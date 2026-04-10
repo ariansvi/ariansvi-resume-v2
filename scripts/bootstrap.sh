@@ -3,7 +3,11 @@ set -euo pipefail
 
 # ─── Resume Cluster Bootstrap ───────────────────────────────────────
 # Provisions infrastructure and installs cluster services
-# Usage: bash scripts/bootstrap.sh [--skip-terraform]
+#
+# Usage:
+#   bash scripts/bootstrap.sh                        # Full bootstrap (project + infra + cluster)
+#   bash scripts/bootstrap.sh --skip-bootstrap        # Skip GCP project creation
+#   bash scripts/bootstrap.sh --skip-terraform        # Skip all Terraform
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -32,27 +36,69 @@ check_dependencies() {
     log "All dependencies found"
 }
 
+run_bootstrap_terraform() {
+    if [[ "${SKIP_BOOTSTRAP:-}" == "true" ]]; then
+        warn "Skipping bootstrap Terraform (--skip-bootstrap)"
+        return 0
+    fi
+
+    log "=== Phase 0: Bootstrap GCP Project ==="
+    echo ""
+    echo "  This creates the GCP project, enables APIs, and creates the"
+    echo "  Terraform state bucket. You only need to run this once."
+    echo ""
+
+    # Get billing account
+    BILLING_ACCOUNT="${BILLING_ACCOUNT:-}"
+    if [[ -z "$BILLING_ACCOUNT" ]]; then
+        log "Available billing accounts:"
+        gcloud billing accounts list --format="table(name, displayName, open)" 2>/dev/null || true
+        echo ""
+        read -rp "Enter billing account ID (XXXXXX-XXXXXX-XXXXXX): " BILLING_ACCOUNT
+    fi
+
+    if [[ -z "$BILLING_ACCOUNT" ]]; then
+        err "Billing account is required"
+        exit 1
+    fi
+
+    cd "$PROJECT_ROOT/terraform/bootstrap"
+    terraform init
+
+    log "Planning bootstrap..."
+    terraform plan -var "billing_account=${BILLING_ACCOUNT}" -out=tfplan
+
+    read -rp "Create GCP project and state bucket? (y/N): " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        terraform apply tfplan
+        log "Bootstrap complete!"
+
+        # Extract project number for GitHub Actions
+        PROJECT_NUMBER=$(terraform output -raw project_number 2>/dev/null || echo "unknown")
+        echo ""
+        echo -e "  ${YELLOW}IMPORTANT: Save this as a GitHub Actions secret:${NC}"
+        echo -e "  ${GREEN}GCP_PROJECT_NUMBER=${PROJECT_NUMBER}${NC}"
+        echo ""
+    else
+        warn "Bootstrap skipped"
+    fi
+
+    cd "$PROJECT_ROOT"
+}
+
 setup_gcp_project() {
     log "Setting GCP project to ${PROJECT_ID}"
     gcloud config set project "$PROJECT_ID"
-
-    log "Enabling required APIs..."
-    gcloud services enable \
-        container.googleapis.com \
-        artifactregistry.googleapis.com \
-        dns.googleapis.com \
-        iam.googleapis.com \
-        compute.googleapis.com \
-        --quiet
 }
 
 run_terraform() {
-    if [[ "${1:-}" == "--skip-terraform" ]]; then
+    if [[ "${SKIP_TERRAFORM:-}" == "true" ]]; then
         warn "Skipping Terraform (--skip-terraform)"
         return 0
     fi
 
-    log "Initializing Terraform..."
+    log "=== Phase 1: Infrastructure ==="
+
     cd "$PROJECT_ROOT/terraform"
     terraform init
 
@@ -145,12 +191,21 @@ EOF
 # ─── Main ────────────────────────────────────────────────────────────
 
 main() {
+    # Parse flags
+    for arg in "$@"; do
+        case "$arg" in
+            --skip-bootstrap)  SKIP_BOOTSTRAP=true ;;
+            --skip-terraform)  SKIP_TERRAFORM=true; SKIP_BOOTSTRAP=true ;;
+        esac
+    done
+
     log "Starting bootstrap for ariansvi-resume..."
     echo ""
 
     check_dependencies
+    run_bootstrap_terraform
     setup_gcp_project
-    run_terraform "$@"
+    run_terraform
     configure_kubectl
     install_argocd
     deploy_app_of_apps

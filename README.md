@@ -78,7 +78,12 @@ make dev
 ### Deploy to GKE
 
 ```bash
-# 1. Bootstrap infrastructure + cluster
+# 0. Authenticate with GCP
+gcloud auth login
+gcloud auth application-default login
+
+# 1. Bootstrap everything (GCP project + infra + cluster + ArgoCD)
+#    You'll be prompted for your billing account ID
 bash scripts/bootstrap.sh
 
 # 2. Configure DNS (GoDaddy → Cloud DNS)
@@ -88,11 +93,18 @@ bash scripts/setup-dns.sh
 bash scripts/port-forward.sh
 ```
 
+The bootstrap is fully IaC — even the GCP project itself is created by Terraform (`terraform/bootstrap/`). The flow:
+
+1. **`terraform/bootstrap/`** — creates GCP project, enables APIs, creates state bucket (local state)
+2. **`terraform/`** — creates VPC, GKE, DNS, IAM, Artifact Registry (remote state in GCS)
+3. **`scripts/bootstrap.sh`** — installs ArgoCD, cert-manager, deploys app-of-apps
+
 ## Repository Structure
 
 ```
 .
 ├── terraform/           # GKE, VPC, DNS, IAM, Artifact Registry
+│   └── bootstrap/       # GCP project creation (IaC all the way down)
 ├── app/
 │   ├── frontend/        # Hugo static site + Nginx
 │   └── backend/         # Python FastAPI + SQLite
