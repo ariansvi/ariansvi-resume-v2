@@ -141,9 +141,9 @@ install_argocd() {
         --set server.resources.limits.cpu=500m \
         --set server.resources.limits.memory=256Mi \
         --set controller.resources.requests.cpu=100m \
-        --set controller.resources.requests.memory=256Mi \
+        --set controller.resources.requests.memory=512Mi \
         --set controller.resources.limits.cpu=500m \
-        --set controller.resources.limits.memory=512Mi \
+        --set controller.resources.limits.memory=1Gi \
         --wait --timeout 5m
 
     log "Waiting for ArgoCD to be ready..."
@@ -161,13 +161,30 @@ install_argocd() {
     echo ""
 }
 
-deploy_app_of_apps() {
-    log "Deploying app-of-apps to ArgoCD..."
-    kubectl apply -f "$PROJECT_ROOT/k8s/argocd/app-of-apps.yaml"
-    log "ArgoCD will now sync all applications automatically"
-}
+install_cluster_services() {
+    log "=== Phase 3: Cluster Services (Helm) ==="
 
-install_cert_issuer() {
+    # Ingress-NGINX
+    log "Installing ingress-nginx..."
+    helm upgrade --install ingress-nginx ingress-nginx \
+        --repo https://kubernetes.github.io/ingress-nginx \
+        --namespace ingress-nginx --create-namespace \
+        --set controller.replicaCount=1 \
+        --set controller.resources.requests.cpu=100m \
+        --set controller.resources.requests.memory=128Mi \
+        --wait --timeout 5m
+
+    # Cert-manager
+    log "Installing cert-manager..."
+    helm upgrade --install cert-manager cert-manager \
+        --repo https://charts.jetstack.io \
+        --namespace cert-manager --create-namespace \
+        --set crds.enabled=true \
+        --set resources.requests.cpu=50m \
+        --set resources.requests.memory=64Mi \
+        --wait --timeout 5m
+
+    # Let's Encrypt ClusterIssuer
     log "Creating Let's Encrypt ClusterIssuer..."
     kubectl apply -f - <<EOF
 apiVersion: cert-manager.io/v1
@@ -185,7 +202,30 @@ spec:
           ingress:
             class: nginx
 EOF
-    log "ClusterIssuer created"
+
+    # Prometheus
+    log "Installing Prometheus..."
+    helm upgrade --install prometheus prometheus \
+        --repo https://prometheus-community.github.io/helm-charts \
+        --namespace monitoring --create-namespace \
+        -f "$PROJECT_ROOT/monitoring/prometheus/values.yaml" \
+        --wait --timeout 5m
+
+    # Grafana
+    log "Installing Grafana..."
+    helm upgrade --install grafana grafana \
+        --repo https://grafana.github.io/helm-charts \
+        --namespace monitoring \
+        -f "$PROJECT_ROOT/monitoring/grafana/values.yaml" \
+        --wait --timeout 5m
+
+    log "All cluster services installed!"
+}
+
+deploy_app_of_apps() {
+    log "=== Phase 4: Deploy Resume App (ArgoCD GitOps) ==="
+    kubectl apply -f "$PROJECT_ROOT/k8s/argocd/app-of-apps.yaml"
+    log "ArgoCD will now sync the resume app automatically"
 }
 
 # ─── Main ────────────────────────────────────────────────────────────
@@ -208,14 +248,8 @@ main() {
     run_terraform
     configure_kubectl
     install_argocd
+    install_cluster_services
     deploy_app_of_apps
-
-    # Wait for cert-manager to be ready before creating issuer
-    log "Waiting for cert-manager..."
-    sleep 30
-    kubectl wait --for=condition=available deployment/cert-manager \
-        -n cert-manager --timeout=300s 2>/dev/null || warn "cert-manager not ready yet, run install_cert_issuer manually"
-    install_cert_issuer
 
     echo ""
     log "Bootstrap complete!"
