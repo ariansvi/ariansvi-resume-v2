@@ -1,6 +1,5 @@
 ---
 title: "Technical Skills"
-date: 2024-01-01
 ---
 
 ## Container Orchestration

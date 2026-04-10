@@ -8,7 +8,7 @@ theme = "terminal"
   fullWidthTheme = false
   centerTheme = true
   autoCover = true
-  showLastUpdated = true
+  showLastUpdated = false
   description = "Senior DevOps Engineer | 10+ Years | Kubernetes, Terraform, CI/CD, Cloud Architecture"
 
   [params.logo]

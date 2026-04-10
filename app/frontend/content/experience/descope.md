@@ -1,17 +1,16 @@
 ---
 title: "Descope — DevOps Engineer"
-date: 2022-01-01
-tags: ["kubernetes", "pulumi", "aws", "gcp", "azure", "datadog"]
+weight: 1
+tags: ["kubernetes", "pulumi", "aws", "gcp", "azure", "datadog", "github-actions"]
 ---
 
-**2022 – Present** | DevOps Engineer
+**Sep 2024 – Present** | DevOps Engineer | Israel (Hybrid)
 
-Multi-cloud Kubernetes infrastructure for an identity platform serving millions of authentication requests.
+Multi-cloud Kubernetes infrastructure for an identity and authentication platform.
 
 ### Responsibilities
 
-- Manage **25+ microservices** across AWS EKS, GCP GKE, and Azure AKS
-- Infrastructure as Code with **Pulumi (TypeScript)** — VPCs, clusters, DNS, IAM, databases
+- Manage **25+ microservices** across AWS EKS, GCP GKE, and Azure AKS using **Pulumi (TypeScript)**
 - Production deployments across **4 global regions** (US, EU, APAC, Canada)
 - **CI/CD pipelines** with GitHub Actions — automated version cuts, staging promotion, production rollouts
 - **Observability** with Datadog — APM, logs, custom dashboards, alerting
@@ -21,6 +20,5 @@ Multi-cloud Kubernetes infrastructure for an identity platform serving millions 
 ### Key Achievements
 
 - Built automated promotion flow: Sandbox → RC (twice weekly) → Production (weekly)
-- Designed and implemented multi-region failover strategy
+- Designed multi-region failover strategy
 - Reduced deployment time by 60% through pipeline optimization
-- Implemented sealed-secrets and RBAC for zero-trust cluster security

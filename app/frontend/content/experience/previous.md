@@ -1,27 +1,28 @@
 ---
-title: "Earlier Career — DevOps & Infrastructure"
-date: 2014-01-01
-tags: ["linux", "jenkins", "gitlab", "docker", "ansible", "terraform"]
+title: "Earlier Career — Linux & Infrastructure"
+weight: 3
+tags: ["linux", "networking", "docker", "ecommerce", "hosting"]
 ---
 
-**2014 – 2022** | Various DevOps & Infrastructure Roles
+### inManage — Linux System Administrator
+**Nov 2016 – Aug 2018** | 1 year 10 months | Tel Aviv, Israel
 
-### Skills Built Over This Period
+- Linux system administration for eCommerce platform infrastructure
+- Server provisioning, monitoring, and troubleshooting
+- Managed production environments supporting online retail operations
+- Automation with Bash scripting, configuration management
 
-- **Linux Administration** — RHEL, Ubuntu, CentOS — kernel tuning, systemd, networking, troubleshooting
-- **Configuration Management** — Ansible, Puppet, Chef
-- **CI/CD** — Jenkins (pipeline-as-code, shared libraries), GitLab CI/CD
-- **Containerization** — Docker adoption from early days, Docker Compose, Swarm → Kubernetes migration
-- **Cloud Migration** — on-premise to AWS, hybrid architectures
-- **Databases** — MySQL administration, Elasticsearch cluster management, Redis
-- **Networking** — TCP/IP, DNS, load balancers, VPNs, firewall rules, SSL/TLS
-- **Monitoring** — Nagios → Zabbix → Prometheus + Grafana evolution
-- **Scripting** — Bash (thousands of lines of production scripts), Python automation
+### Interhost Networks Ltd — Linux Administrator
+**Feb 2015 – Sep 2016** | 1 year 8 months
 
-### Notable Projects
+- Web hosting infrastructure administration
+- Managed Linux servers (CentOS, Ubuntu) for hosting customers
+- DNS management, SSL certificates, Apache/Nginx configuration
+- Network troubleshooting, firewall rules, server hardening
 
-- Migrated legacy Jenkins infrastructure to GitLab CI/CD pipelines
-- Built self-service deployment platform using Docker + Jenkins
-- Designed and implemented Elasticsearch cluster for centralized logging (100GB+/day)
-- Automated server provisioning with Terraform + Ansible
-- Built MySQL replication and backup automation
+### Calanit — Technical Support
+**Jan 2014 – Feb 2015** | 1 year 2 months
+
+- First role in tech — technical support and helpdesk
+- Built foundation in Linux, networking, and troubleshooting
+- Started the journey into DevOps and infrastructure

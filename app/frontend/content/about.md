@@ -1,6 +1,5 @@
 ---
 title: "About Me"
-date: 2024-01-01
 ---
 
 ![Arian Svirsky](/images/arian.jpg)
@@ -32,5 +31,5 @@ Currently working as a DevOps Engineer at **Descope**, managing multi-cloud Kube
 ## Connect
 
 - **GitHub:** [ariansvi](https://github.com/ariansvi)
-- **LinkedIn:** [Arian Svirsky](https://www.linkedin.com/in/ariansvirsky/)
-- **Email:** arian@ariansvi.com
+- **LinkedIn:** [Arian Svirsky](https://www.linkedin.com/in/arian-svirsky-a0832057/)
+- **Email:** ariansvirsky@gmail.com

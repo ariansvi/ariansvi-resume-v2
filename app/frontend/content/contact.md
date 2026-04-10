@@ -1,15 +1,14 @@
 ---
 title: "Contact"
-date: 2024-01-01
 ---
 
 ## Get In Touch
 
 Interested in working together or have a question? Reach out through any of these channels.
 
-- **Email:** arian@ariansvi.com
+- **Email:** ariansvirsky@gmail.com
 - **GitHub:** [ariansvi](https://github.com/ariansvi)
-- **LinkedIn:** [Arian Svirsky](https://www.linkedin.com/in/ariansvirsky/)
+- **LinkedIn:** [Arian Svirsky](https://www.linkedin.com/in/arian-svirsky-a0832057/)
 
 ---
 
