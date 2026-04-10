@@ -3,5 +3,5 @@ kind: Namespace
 metadata:
   name: resume
   labels:
-    app.kubernetes.io/part-of: ariansvi-resume
+    app.kubernetes.io/part-of: arian-svirsky-resume
     environment: production

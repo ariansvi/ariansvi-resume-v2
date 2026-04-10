@@ -24,8 +24,8 @@ patches:
 
 images:
   - name: frontend
-    newName: us-central1-docker.pkg.dev/ariansvi-resume/resume/frontend
+    newName: us-central1-docker.pkg.dev/arian-svirsky-resume/resume/frontend
     newTag: latest
   - name: backend
-    newName: us-central1-docker.pkg.dev/ariansvi-resume/resume/backend
+    newName: us-central1-docker.pkg.dev/arian-svirsky-resume/resume/backend
     newTag: latest

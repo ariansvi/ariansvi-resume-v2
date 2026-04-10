@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 REGION="${REGION:-us-central1}"
-PROJECT_ID="${PROJECT_ID:-ariansvi-resume}"
+PROJECT_ID="${PROJECT_ID:-arian-svirsky-resume}"
 CLUSTER_NAME="${CLUSTER_NAME:-resume-cluster}"
 
 RED='\033[0;31m'
@@ -199,7 +199,7 @@ main() {
         esac
     done
 
-    log "Starting bootstrap for ariansvi-resume..."
+    log "Starting bootstrap for arian-svirsky-resume..."
     echo ""
 
     check_dependencies

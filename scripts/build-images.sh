@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 REGION="${REGION:-us-central1}"
-PROJECT_ID="${PROJECT_ID:-ariansvi-resume}"
+PROJECT_ID="${PROJECT_ID:-arian-svirsky-resume}"
 REGISTRY="${REGION}-docker.pkg.dev/${PROJECT_ID}/resume"
 TAG="${1:-$(git rev-parse --short HEAD)}"
 

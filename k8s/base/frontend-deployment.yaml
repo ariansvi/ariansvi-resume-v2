@@ -6,7 +6,7 @@ metadata:
   labels:
     app: frontend
     app.kubernetes.io/name: frontend
-    app.kubernetes.io/part-of: ariansvi-resume
+    app.kubernetes.io/part-of: arian-svirsky-resume
     app.kubernetes.io/component: web
 spec:
   replicas: 1

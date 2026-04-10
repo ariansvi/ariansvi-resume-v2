@@ -1,7 +1,7 @@
 .PHONY: help build test lint clean dev deploy-dev deploy-prod tf-plan tf-apply bootstrap teardown
 
 SHELL := /bin/bash
-PROJECT_ID ?= ariansvi-resume
+PROJECT_ID ?= arian-svirsky-resume
 REGION ?= us-central1
 REGISTRY ?= $(REGION)-docker.pkg.dev/$(PROJECT_ID)/resume
 FRONTEND_IMAGE ?= $(REGISTRY)/frontend

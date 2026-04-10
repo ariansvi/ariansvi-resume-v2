@@ -35,7 +35,7 @@ provider "google" {
 variable "project_id" {
   description = "GCP project ID to create"
   type        = string
-  default     = "ariansvi-resume"
+  default     = "arian-svirsky-resume"
 }
 
 variable "project_name" {

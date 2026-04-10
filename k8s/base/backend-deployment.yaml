@@ -6,7 +6,7 @@ metadata:
   labels:
     app: backend
     app.kubernetes.io/name: backend
-    app.kubernetes.io/part-of: ariansvi-resume
+    app.kubernetes.io/part-of: arian-svirsky-resume
     app.kubernetes.io/component: api
 spec:
   replicas: 1
@@ -116,4 +116,4 @@ metadata:
   name: backend
   namespace: resume
   annotations:
-    iam.gke.io/gcp-service-account: resume-backend@ariansvi-resume.iam.gserviceaccount.com
+    iam.gke.io/gcp-service-account: resume-backend@arian-svirsky-resume.iam.gserviceaccount.com

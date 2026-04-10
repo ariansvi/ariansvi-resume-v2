@@ -23,7 +23,7 @@ controller:
     configScripts:
       welcome-message: |
         jenkins:
-          systemMessage: "Jenkins for ariansvi-resume - Managed by Helm"
+          systemMessage: "Jenkins for arian-svirsky-resume - Managed by Helm"
 
 persistence:
   size: 5Gi

@@ -13,7 +13,7 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "ariansvi-resume-tfstate"
+    bucket = "arian-svirsky-resume-tfstate"
     prefix = "terraform/state"
   }
 }

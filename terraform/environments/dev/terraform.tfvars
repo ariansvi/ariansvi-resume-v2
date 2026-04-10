@@ -1,4 +1,4 @@
-project_id   = "ariansvi-resume-dev"
+project_id   = "arian-svirsky-resume-dev"
 region       = "us-central1"
 environment  = "dev"
 domain       = "dev.ariansvi.com"

@@ -4,7 +4,7 @@ metadata:
   name: resume-ingress
   namespace: resume
   labels:
-    app.kubernetes.io/part-of: ariansvi-resume
+    app.kubernetes.io/part-of: arian-svirsky-resume
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod

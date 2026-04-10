@@ -4,7 +4,7 @@ metadata:
   name: resume-app
   namespace: argocd
   labels:
-    app.kubernetes.io/part-of: ariansvi-resume
+    app.kubernetes.io/part-of: arian-svirsky-resume
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
