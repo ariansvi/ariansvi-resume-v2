@@ -4,7 +4,7 @@ title = "Arian Svirsky | DevOps Engineer"
 theme = "terminal"
 
 [params]
-  showMenuItems = 5
+  showMenuItems = 2
   fullWidthTheme = false
   centerTheme = true
   autoCover = true

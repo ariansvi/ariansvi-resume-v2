@@ -26,6 +26,16 @@
     transform: translateY(-100%);
   }
 
+  /* Fix desktop menu overlap on mobile */
+  @media (max-width: 768px) {
+    .navigation-menu {
+      display: none;
+    }
+    .menu--mobile {
+      display: flex !important;
+    }
+  }
+
   /* Contact footer */
   .contact-footer {
     background: var(--background);
