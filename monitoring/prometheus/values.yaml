@@ -1,4 +1,4 @@
-# Lightweight Prometheus config for personal project
+# Lightweight Prometheus config for GKE Autopilot
 server:
   persistentVolume:
     size: 5Gi
@@ -26,14 +26,9 @@ kube-state-metrics:
       cpu: 100m
       memory: 128Mi
 
+# Disabled — Autopilot blocks hostPath, hostPID, hostNetwork
 prometheus-node-exporter:
-  resources:
-    requests:
-      cpu: 50m
-      memory: 32Mi
-    limits:
-      cpu: 100m
-      memory: 64Mi
+  enabled: false
 
 prometheus-pushgateway:
   enabled: false

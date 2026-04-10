@@ -22,7 +22,6 @@ title: "Technical Skills"
 ## Cloud Platforms
 - **AWS** — EKS, EC2, RDS, S3, Lambda, CloudFront, Route53, IAM, VPC
 - **GCP** — GKE, Cloud DNS, Artifact Registry, Cloud SQL, GCS
-- **Azure** — AKS, Azure DevOps, Key Vault
 
 ## Monitoring & Observability
 - **Datadog** — APM, logs, dashboards, monitors, SLOs

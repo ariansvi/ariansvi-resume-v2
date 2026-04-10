@@ -17,7 +17,7 @@ I specialize in turning complex deployment challenges into reliable, self-healin
 - **Infrastructure as Code** — Terraform, Pulumi, CloudFormation
 - **Container Orchestration** — Kubernetes (EKS, GKE, AKS), Docker, Helm
 - **CI/CD Pipelines** — GitHub Actions, GitLab CI, Jenkins, ArgoCD
-- **Cloud Platforms** — AWS (primary), GCP, Azure
+- **Cloud Platforms** — AWS (primary), GCP
 - **Monitoring & Observability** — Datadog, Prometheus, Grafana, ELK
 - **Scripting & Automation** — Bash, Python, Go
 
