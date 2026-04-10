@@ -3,6 +3,8 @@ title: "About Me"
 date: 2024-01-01
 ---
 
+![Arian Svirsky](/images/arian.jpg)
+
 # Arian Svirsky
 
 **Senior DevOps Engineer** — Building production infrastructure since 2014.

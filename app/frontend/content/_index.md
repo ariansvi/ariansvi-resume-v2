@@ -2,6 +2,8 @@
 title: "Home"
 ---
 
+![Arian Svirsky](/images/arian.jpg)
+
 # Hey, I'm Arian Svirsky
 
 **Senior DevOps Engineer** with 10+ years of experience building, scaling, and automating production infrastructure.
