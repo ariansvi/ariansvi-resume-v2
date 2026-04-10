@@ -26,12 +26,10 @@ resource "google_container_cluster" "main" {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
 
-  # Maintenance window — Sunday 2-6 AM UTC
+  # Maintenance window — daily 2-6 AM UTC
   maintenance_policy {
-    recurring_window {
-      start_time = "2024-01-01T02:00:00Z"
-      end_time   = "2024-01-01T06:00:00Z"
-      recurrence = "FREQ=WEEKLY;BYDAY=SU"
+    daily_maintenance_window {
+      start_time = "02:00"
     }
   }
 

@@ -3,7 +3,7 @@ FROM hugomods/hugo:go-0.139.0 AS builder
 WORKDIR /src
 COPY . .
 
-RUN hugo mod get && hugo --minify
+RUN hugo --minify
 
 FROM nginx:1.27-alpine
 
