@@ -13,6 +13,11 @@
 <meta name="twitter:image" content="{{ "images/arian.jpg" | absURL }}" />
 
 <style>
+  /* Hide logo decoration overflow */
+  .header__inner {
+    overflow: hidden;
+  }
+
   /* Sticky header */
   .header {
     position: sticky;
@@ -26,13 +31,29 @@
     transform: translateY(-100%);
   }
 
-  /* Fix desktop menu overlap on mobile */
+  /* Fix mobile menu */
   @media (max-width: 768px) {
     .navigation-menu {
-      display: none;
+      display: none !important;
     }
     .menu--mobile {
       display: flex !important;
+    }
+    .menu__dropdown {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background: var(--background);
+      border: 2px solid var(--accent);
+      padding: 10px 0;
+      z-index: 200;
+      min-width: 150px;
+    }
+    .menu__dropdown li {
+      padding: 5px 20px;
+    }
+    .menu__dropdown a {
+      white-space: nowrap;
     }
   }
 
