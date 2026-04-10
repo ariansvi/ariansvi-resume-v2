@@ -2,10 +2,10 @@ import os
 
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient  # noqa: E402
 
-from app.database import Base, engine
-from app.main import app
+from app.database import Base, engine  # noqa: E402
+from app.main import app  # noqa: E402
 
 client = TestClient(app)
 
