@@ -13,12 +13,7 @@
 <meta name="twitter:image" content="{{ "images/arian.jpg" | absURL }}" />
 
 <style>
-  /* Hide logo decoration overflow */
-  .header__inner {
-    overflow: hidden;
-  }
-
-  /* Sticky header */
+  /* Sticky header — hides on scroll down, shows on scroll up */
   .header {
     position: sticky;
     top: 0;
@@ -31,33 +26,12 @@
     transform: translateY(-100%);
   }
 
-  /* Fix mobile menu */
-  @media (max-width: 768px) {
-    .navigation-menu {
-      display: none !important;
-    }
-    .menu--mobile {
-      display: flex !important;
-    }
-    .menu__dropdown {
-      position: absolute;
-      right: 0;
-      top: 100%;
-      background: var(--background);
-      border: 2px solid var(--accent);
-      padding: 10px 0;
-      z-index: 200;
-      min-width: 150px;
-    }
-    .menu__dropdown li {
-      padding: 5px 20px;
-    }
-    .menu__dropdown a {
-      white-space: nowrap;
-    }
+  /* Hide logo decoration overflow (the vertical lines bug) */
+  .header__inner {
+    overflow: hidden;
   }
 
-  /* Contact footer */
+  /* Contact footer bar */
   .contact-footer {
     background: var(--background);
     border-top: 2px solid var(--accent);
@@ -69,7 +43,7 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 12px;
     list-style: none;
     padding: 0;
     margin: 10px 0;
@@ -83,10 +57,22 @@
     border: 1px solid var(--accent);
     border-radius: 4px;
     transition: all 0.2s ease;
+    font-size: 0.9em;
+    white-space: nowrap;
   }
 
   .contact-footer__links a:hover {
     background: var(--accent);
     color: var(--background);
+  }
+
+  @media (max-width: 768px) {
+    .contact-footer__links {
+      gap: 8px;
+    }
+    .contact-footer__links a {
+      padding: 6px 12px;
+      font-size: 0.85em;
+    }
   }
 </style>
