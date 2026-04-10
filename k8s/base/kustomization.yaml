@@ -12,6 +12,7 @@ resources:
   - ingress.yaml
   - hpa.yaml
   - network-policy.yaml
+  - network-policy-acme.yaml
 
 commonLabels:
   app.kubernetes.io/managed-by: kustomize
