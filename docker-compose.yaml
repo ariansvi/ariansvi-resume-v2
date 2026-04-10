@@ -1,0 +1,39 @@
+services:
+  frontend:
+    build:
+      context: ./app/frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - resume
+
+  backend:
+    build:
+      context: ./app/backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=sqlite:///./data/resume.db
+      - CORS_ORIGINS=http://localhost:8080,http://localhost
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - backend-data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - resume
+
+volumes:
+  backend-data:
+
+networks:
+  resume:
+    driver: bridge

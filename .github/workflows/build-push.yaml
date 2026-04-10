@@ -1,0 +1,72 @@
+name: Build & Push Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - ".github/workflows/build-push.yaml"
+
+env:
+  PROJECT_ID: ariansvi-resume
+  REGION: us-central1
+  REGISTRY: us-central1-docker.pkg.dev/ariansvi-resume/resume
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: resume-ci-cd@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GAR
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push
+        run: |
+          TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          docker build \
+            -t ${{ env.REGISTRY }}/frontend:${TAG} \
+            -t ${{ env.REGISTRY }}/frontend:latest \
+            app/frontend/
+          docker push ${{ env.REGISTRY }}/frontend:${TAG}
+          docker push ${{ env.REGISTRY }}/frontend:latest
+
+  build-backend:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: resume-ci-cd@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GAR
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push
+        run: |
+          TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          docker build \
+            -t ${{ env.REGISTRY }}/backend:${TAG} \
+            -t ${{ env.REGISTRY }}/backend:latest \
+            app/backend/
+          docker push ${{ env.REGISTRY }}/backend:${TAG}
+          docker push ${{ env.REGISTRY }}/backend:latest

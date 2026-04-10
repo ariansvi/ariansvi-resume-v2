@@ -1,0 +1,53 @@
+# Terraform
+terraform/.terraform/
+terraform/**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform.lock.hcl
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Hugo
+app/frontend/public/
+app/frontend/resources/
+
+# Node (if Hugo theme needs it)
+node_modules/
+
+# Docker
+.docker/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Secrets
+*.pem
+*.key
+*secret*
+.env
+.env.*
+!.env.example
+
+# SQLite
+*.db
+*.sqlite3
+
+# OS
+Thumbs.db

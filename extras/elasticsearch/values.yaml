@@ -1,0 +1,23 @@
+# Elasticsearch + Kibana — deploy on demand
+# Usage: helm install elasticsearch elastic/elasticsearch -f extras/elasticsearch/values.yaml -n logging --create-namespace
+# Usage: helm install kibana elastic/kibana -f extras/elasticsearch/kibana-values.yaml -n logging
+
+replicas: 1
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "1"
+    memory: 2Gi
+
+volumeClaimTemplate:
+  resources:
+    requests:
+      storage: 10Gi
+
+esJavaOpts: "-Xmx512m -Xms512m"
+
+# Single-node mode for cost savings
+clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"

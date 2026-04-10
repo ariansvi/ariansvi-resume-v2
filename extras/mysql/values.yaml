@@ -1,0 +1,28 @@
+# MySQL — deploy on demand for database skill showcase
+# Usage: helm install mysql bitnami/mysql -f extras/mysql/values.yaml -n database --create-namespace
+
+auth:
+  rootPassword: ""  # Set via --set auth.rootPassword=xxx
+  database: resume
+  username: resume_app
+
+primary:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  persistence:
+    size: 5Gi
+
+secondary:
+  replicaCount: 0  # Single node for cost
+
+metrics:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 32Mi

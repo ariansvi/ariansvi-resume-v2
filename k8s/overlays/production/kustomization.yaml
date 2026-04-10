@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: resume
+
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+images:
+  - name: frontend
+    newName: us-central1-docker.pkg.dev/ariansvi-resume/resume/frontend
+    newTag: latest
+  - name: backend
+    newName: us-central1-docker.pkg.dev/ariansvi-resume/resume/backend
+    newTag: latest

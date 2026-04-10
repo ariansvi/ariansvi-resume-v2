@@ -1,0 +1,48 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag to deploy (default: latest)"
+        required: false
+        default: "latest"
+
+env:
+  REGISTRY: us-central1-docker.pkg.dev/ariansvi-resume/resume
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update kustomization with new image tag
+        run: |
+          TAG=${{ github.event.inputs.image_tag }}
+          cd k8s/overlays/production
+
+          # Update image tags in kustomization.yaml
+          sed -i "s/newTag: .*/newTag: ${TAG}/" kustomization.yaml
+
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          TAG=${{ github.event.inputs.image_tag }}
+          git add k8s/overlays/production/kustomization.yaml
+          git diff --cached --quiet || \
+            git commit -m "deploy: update production to ${TAG}" && \
+            git push
+
+      - name: Notify
+        run: |
+          echo "Production deployment triggered with tag: ${{ github.event.inputs.image_tag }}"
+          echo "ArgoCD will pick up the change and sync automatically."

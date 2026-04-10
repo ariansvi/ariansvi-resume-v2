@@ -1,0 +1,5 @@
+project_id   = "ariansvi-resume"
+region       = "us-central1"
+environment  = "prod"
+domain       = "ariansvi.com"
+cluster_name = "resume-cluster"

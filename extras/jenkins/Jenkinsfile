@@ -1,0 +1,105 @@
+// Jenkinsfile — pipeline-as-code demo
+// This showcases Jenkins pipeline skills alongside GitHub Actions
+
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: docker:dind
+    securityContext:
+      privileged: true
+  - name: python
+    image: python:3.12-slim
+    command: ['cat']
+    tty: true
+'''
+        }
+    }
+
+    environment {
+        REGISTRY = 'us-central1-docker.pkg.dev/ariansvi-resume/resume'
+        TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'unknown'}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Test') {
+            steps {
+                container('python') {
+                    sh '''
+                        cd app/backend
+                        pip install -r requirements.txt
+                        pytest tests/ -v --tb=short
+                    '''
+                }
+            }
+        }
+
+        stage('Lint') {
+            parallel {
+                stage('Python Lint') {
+                    steps {
+                        container('python') {
+                            sh '''
+                                cd app/backend
+                                flake8 app/ tests/ --max-line-length=88
+                            '''
+                        }
+                    }
+                }
+                stage('Dockerfile Lint') {
+                    steps {
+                        container('docker') {
+                            sh 'docker run --rm -i hadolint/hadolint < app/backend/Dockerfile || true'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build Images') {
+            parallel {
+                stage('Frontend') {
+                    steps {
+                        container('docker') {
+                            sh """
+                                docker build -t ${REGISTRY}/frontend:${TAG} app/frontend/
+                            """
+                        }
+                    }
+                }
+                stage('Backend') {
+                    steps {
+                        container('docker') {
+                            sh """
+                                docker build -t ${REGISTRY}/backend:${TAG} app/backend/
+                            """
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo "Pipeline succeeded! Tag: ${TAG}"
+        }
+        failure {
+            echo "Pipeline failed!"
+        }
+    }
+}

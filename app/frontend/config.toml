@@ -1,0 +1,68 @@
+baseURL = "https://ariansvi.com/"
+languageCode = "en-us"
+title = "Arian Svirsky | DevOps Engineer"
+theme = "terminal"
+
+[params]
+  showMenuItems = 5
+  fullWidthTheme = false
+  centerTheme = true
+  autoCover = true
+  showLastUpdated = true
+  description = "Senior DevOps Engineer | 10+ Years | Kubernetes, Terraform, CI/CD, Cloud Architecture"
+
+  [params.logo]
+    logoText = "arian@devops:~$"
+    logoHomeLink = "/"
+
+  [params.footer]
+    copyright = "Arian Svirsky"
+    since = 2014
+
+[languages]
+  [languages.en]
+    languageName = "English"
+    title = "Arian Svirsky | DevOps Engineer"
+
+    [languages.en.params]
+      subtitle = "Senior DevOps Engineer"
+      owner = "Arian Svirsky"
+      keywords = "devops, kubernetes, terraform, docker, cloud, sre, infrastructure"
+      copyright = "Arian Svirsky"
+      menuMore = "Show more"
+      readMore = "Read more"
+      readOtherPosts = "Read other posts"
+
+    [[languages.en.menu.main]]
+      identifier = "about"
+      name = "About"
+      url = "/about"
+      weight = 1
+
+    [[languages.en.menu.main]]
+      identifier = "experience"
+      name = "Experience"
+      url = "/experience"
+      weight = 2
+
+    [[languages.en.menu.main]]
+      identifier = "projects"
+      name = "Projects"
+      url = "/projects"
+      weight = 3
+
+    [[languages.en.menu.main]]
+      identifier = "skills"
+      name = "Skills"
+      url = "/skills"
+      weight = 4
+
+    [[languages.en.menu.main]]
+      identifier = "contact"
+      name = "Contact"
+      url = "/contact"
+      weight = 5
+
+[module]
+  [[module.imports]]
+    path = "github.com/panr/hugo-theme-terminal"

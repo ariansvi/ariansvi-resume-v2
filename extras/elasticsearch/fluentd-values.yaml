@@ -1,0 +1,39 @@
+# Fluentd DaemonSet for log collection
+# Usage: helm install fluentd fluent/fluentd -f extras/elasticsearch/fluentd-values.yaml -n logging
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+fileConfigs:
+  01_sources.conf: |
+    <source>
+      @type tail
+      path /var/log/containers/*.log
+      pos_file /var/log/fluentd-containers.log.pos
+      tag kubernetes.*
+      <parse>
+        @type json
+        time_key time
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+      </parse>
+    </source>
+
+  02_filters.conf: |
+    <filter kubernetes.**>
+      @type kubernetes_metadata
+    </filter>
+
+  03_outputs.conf: |
+    <match kubernetes.**>
+      @type elasticsearch
+      host elasticsearch-master.logging.svc.cluster.local
+      port 9200
+      logstash_format true
+      logstash_prefix k8s
+      include_tag_key true
+    </match>

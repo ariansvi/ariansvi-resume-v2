@@ -1,0 +1,48 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: resume-vs
+  namespace: resume
+spec:
+  hosts:
+    - ariansvi.com
+  gateways:
+    - resume-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /api
+      route:
+        - destination:
+            host: backend
+            port:
+              number: 8000
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+      timeout: 10s
+    - route:
+        - destination:
+            host: frontend
+            port:
+              number: 80
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: resume-gateway
+  namespace: resume
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: resume-tls
+      hosts:
+        - ariansvi.com

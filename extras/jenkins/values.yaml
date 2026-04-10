@@ -1,0 +1,38 @@
+# Jenkins — deploy on demand for CI/CD skill showcase
+# Usage: helm install jenkins jenkins/jenkins -f extras/jenkins/values.yaml -n jenkins --create-namespace
+
+controller:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+  installPlugins:
+    - kubernetes:latest
+    - workflow-aggregator:latest
+    - git:latest
+    - configuration-as-code:latest
+    - pipeline-stage-view:latest
+    - blueocean:latest
+    - docker-workflow:latest
+
+  JCasC:
+    configScripts:
+      welcome-message: |
+        jenkins:
+          systemMessage: "Jenkins for ariansvi-resume - Managed by Helm"
+
+persistence:
+  size: 5Gi
+
+agent:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
