@@ -1,0 +1,61 @@
+<!-- Open Graph -->
+<meta property="og:title" content="{{ .Title | default .Site.Title }}" />
+<meta property="og:description" content="{{ .Description | default .Site.Params.description }}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ .Permalink }}" />
+<meta property="og:image" content="{{ "images/arian.jpg" | absURL }}" />
+<meta property="og:site_name" content="{{ .Site.Title }}" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ .Title | default .Site.Title }}" />
+<meta name="twitter:description" content="{{ .Description | default .Site.Params.description }}" />
+<meta name="twitter:image" content="{{ "images/arian.jpg" | absURL }}" />
+
+<style>
+  /* Sticky header */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--background);
+    transition: transform 0.3s ease;
+  }
+
+  .header--hidden {
+    transform: translateY(-100%);
+  }
+
+  /* Contact footer */
+  .contact-footer {
+    background: var(--background);
+    border-top: 2px solid var(--accent);
+    padding: 20px 0;
+    text-align: center;
+  }
+
+  .contact-footer__links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+  }
+
+  .contact-footer__links a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .contact-footer__links a:hover {
+    background: var(--accent);
+    color: var(--background);
+  }
+</style>

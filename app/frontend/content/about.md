@@ -32,4 +32,4 @@ Currently working as a DevOps Engineer at **Descope**, managing multi-cloud Kube
 
 - **GitHub:** [ariansvi](https://github.com/ariansvi)
 - **LinkedIn:** [Arian Svirsky](https://www.linkedin.com/in/arian-svirsky-a0832057/)
-- **Email:** ariansvirsky@gmail.com
+- **Email:** [ariansvirsky@gmail.com](mailto:ariansvirsky@gmail.com)

@@ -1,4 +1,4 @@
-name: Build & Push Images
+name: Build & Push & Deploy
 
 on:
   push:
@@ -13,15 +13,20 @@ env:
   REGISTRY: us-central1-docker.pkg.dev/arian-svirsky-resume/resume
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
   build-frontend:
     name: Build Frontend
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+
+      - id: tag
+        run: echo "tag=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
 
       - id: auth
         uses: google-github-actions/auth@v2
@@ -36,7 +41,7 @@ jobs:
 
       - name: Build and push
         run: |
-          TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          TAG=${{ steps.tag.outputs.tag }}
           docker build \
             -t ${{ env.REGISTRY }}/frontend:${TAG} \
             -t ${{ env.REGISTRY }}/frontend:latest \
@@ -47,8 +52,13 @@ jobs:
   build-backend:
     name: Build Backend
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+
+      - id: tag
+        run: echo "tag=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
 
       - id: auth
         uses: google-github-actions/auth@v2
@@ -63,10 +73,36 @@ jobs:
 
       - name: Build and push
         run: |
-          TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          TAG=${{ steps.tag.outputs.tag }}
           docker build \
             -t ${{ env.REGISTRY }}/backend:${TAG} \
             -t ${{ env.REGISTRY }}/backend:latest \
             app/backend/
           docker push ${{ env.REGISTRY }}/backend:${TAG}
           docker push ${{ env.REGISTRY }}/backend:latest
+
+  deploy:
+    name: Deploy to Production
+    needs: [build-frontend, build-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update image tags in kustomization
+        run: |
+          TAG=${{ needs.build-frontend.outputs.tag }}
+          cd k8s/overlays/production
+          sed -i "s/newTag: .*/newTag: ${TAG}/" kustomization.yaml
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          TAG=${{ needs.build-frontend.outputs.tag }}
+          git add k8s/overlays/production/kustomization.yaml
+          git diff --cached --quiet || (
+            git commit -m "deploy: update production images to ${TAG} [skip ci]" &&
+            git push
+          )

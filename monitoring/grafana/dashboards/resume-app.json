@@ -1,93 +1,275 @@
 {
   "annotations": { "list": [] },
   "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
   "id": null,
   "links": [],
   "panels": [
     {
-      "title": "Request Rate",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-      "targets": [
-        {
-          "expr": "rate(http_requests_total{job=\"resume-backend\"}[5m])",
-          "legendFormat": "{{method}} {{endpoint}}"
-        }
-      ]
-    },
-    {
-      "title": "Response Time (p95)",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"resume-backend\"}[5m]))",
-          "legendFormat": "p95"
-        }
-      ]
-    },
-    {
-      "title": "Active Pods",
+      "title": "Site Uptime",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "count(up{job=\"resume-backend\"} == 1)",
-          "legendFormat": "Running"
-        }
-      ]
-    },
-    {
-      "title": "Error Rate",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
-      "targets": [
-        {
-          "expr": "rate(http_requests_total{job=\"resume-backend\", status=~\"5..\"}[5m])",
-          "legendFormat": "5xx/s"
+          "expr": "up{job=\"resume-backend\"}",
+          "legendFormat": "Backend"
         }
       ],
       "fieldConfig": {
         "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
           "thresholds": {
             "steps": [
-              { "value": 0, "color": "green" },
-              { "value": 0.01, "color": "yellow" },
-              { "value": 0.1, "color": "red" }
+              { "value": 0, "color": "red" },
+              { "value": 1, "color": "green" }
             ]
           }
         }
       }
     },
     {
-      "title": "Memory Usage",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "title": "Running Pods",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "targets": [
         {
-          "expr": "container_memory_usage_bytes{namespace=\"resume\", container!=\"\"}",
-          "legendFormat": "{{pod}} - {{container}}"
+          "expr": "count(kube_pod_status_phase{namespace=\"resume\", phase=\"Running\"})",
+          "legendFormat": "Pods"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "value": 0, "color": "red" },
+              { "value": 2, "color": "yellow" },
+              { "value": 4, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Total HTTP Requests (24h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "increase(process_open_fds{job=\"resume-backend\"}[24h])",
+          "legendFormat": "Requests"
         }
       ]
     },
     {
-      "title": "CPU Usage",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "title": "Backend Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
       "targets": [
         {
-          "expr": "rate(container_cpu_usage_seconds_total{namespace=\"resume\", container!=\"\"}[5m])",
-          "legendFormat": "{{pod}} - {{container}}"
+          "expr": "process_uptime_seconds{job=\"resume-backend\"}",
+          "legendFormat": "Uptime"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      }
+    },
+    {
+      "title": "CPU Usage by Pod",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "rate(container_cpu_usage_seconds_total{namespace=\"resume\", container!=\"\", container!=\"POD\"}[5m]) * 1000",
+          "legendFormat": "{{ pod }} / {{ container }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "millicores",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "lineWidth": 2
+          }
+        }
+      }
+    },
+    {
+      "title": "Memory Usage by Pod",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "container_memory_working_set_bytes{namespace=\"resume\", container!=\"\", container!=\"POD\"}",
+          "legendFormat": "{{ pod }} / {{ container }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "lineWidth": 2
+          }
+        }
+      }
+    },
+    {
+      "title": "Pod Restart Count",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "kube_pod_container_status_restarts_total{namespace=\"resume\"}",
+          "legendFormat": "{{ pod }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80
+          },
+          "thresholds": {
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 3, "color": "yellow" },
+              { "value": 10, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Network I/O",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(container_network_receive_bytes_total{namespace=\"resume\"}[5m])",
+          "legendFormat": "{{ pod }} RX"
+        },
+        {
+          "expr": "rate(container_network_transmit_bytes_total{namespace=\"resume\"}[5m])",
+          "legendFormat": "{{ pod }} TX"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2
+          }
+        }
+      }
+    },
+    {
+      "title": "Ingress Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 18 },
+      "targets": [
+        {
+          "expr": "rate(nginx_ingress_controller_requests{namespace=\"resume\"}[5m])",
+          "legendFormat": "{{ status }} {{ method }} {{ path }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "lineWidth": 2
+          }
+        }
+      }
+    },
+    {
+      "title": "Ingress Response Time (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 18 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(nginx_ingress_controller_request_duration_seconds_bucket{namespace=\"resume\"}[5m]))",
+          "legendFormat": "p95 {{ ingress }}"
+        },
+        {
+          "expr": "histogram_quantile(0.50, rate(nginx_ingress_controller_request_duration_seconds_bucket{namespace=\"resume\"}[5m]))",
+          "legendFormat": "p50 {{ ingress }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2
+          }
+        }
+      }
+    },
+    {
+      "title": "PVC Disk Usage",
+      "type": "gauge",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "expr": "kubelet_volume_stats_used_bytes{namespace=\"resume\"} / kubelet_volume_stats_capacity_bytes{namespace=\"resume\"} * 100",
+          "legendFormat": "{{ persistentvolumeclaim }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 70, "color": "yellow" },
+              { "value": 90, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Cluster Services Health",
+      "type": "table",
+      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 24 },
+      "targets": [
+        {
+          "expr": "up",
+          "legendFormat": "{{ job }}",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": { "Time": true, "__name__": true },
+            "renameByName": { "job": "Service", "Value": "Status" }
+          }
         }
       ]
     }
   ],
   "schemaVersion": 39,
-  "tags": ["resume", "production"],
+  "tags": ["resume", "production", "overview"],
   "templating": { "list": [] },
-  "time": { "from": "now-1h", "to": "now" },
-  "title": "Resume App Dashboard",
-  "uid": "resume-app"
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "title": "Resume App — Production Overview",
+  "uid": "resume-overview"
 }

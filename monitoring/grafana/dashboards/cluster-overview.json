@@ -1,0 +1,143 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Namespaces",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "count(kube_namespace_labels)", "legendFormat": "Namespaces" }
+      ]
+    },
+    {
+      "title": "Total Pods Running",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [
+        { "expr": "count(kube_pod_status_phase{phase=\"Running\"})", "legendFormat": "Running" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "green", "mode": "fixed" } } }
+    },
+    {
+      "title": "Total Pods Not Ready",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [
+        { "expr": "count(kube_pod_status_phase{phase!=\"Running\", phase!=\"Succeeded\"})", "legendFormat": "Not Ready" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "red", "mode": "fixed" } } }
+    },
+    {
+      "title": "Deployments",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "count(kube_deployment_labels)", "legendFormat": "Deployments" }
+      ]
+    },
+    {
+      "title": "Services",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "targets": [
+        { "expr": "count(kube_service_info)", "legendFormat": "Services" }
+      ]
+    },
+    {
+      "title": "PVCs",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "targets": [
+        { "expr": "count(kube_persistentvolumeclaim_info)", "legendFormat": "PVCs" }
+      ]
+    },
+    {
+      "title": "CPU Usage by Namespace",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\", container!=\"POD\"}[5m])) by (namespace) * 1000",
+          "legendFormat": "{{ namespace }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "millicores",
+          "custom": { "drawStyle": "line", "fillOpacity": 30, "stacking": { "mode": "normal" } }
+        }
+      }
+    },
+    {
+      "title": "Memory Usage by Namespace",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum(container_memory_working_set_bytes{container!=\"\", container!=\"POD\"}) by (namespace)",
+          "legendFormat": "{{ namespace }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": { "drawStyle": "line", "fillOpacity": 30, "stacking": { "mode": "normal" } }
+        }
+      }
+    },
+    {
+      "title": "Pod Status by Namespace",
+      "type": "bargauge",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "count(kube_pod_status_phase{phase=\"Running\"}) by (namespace)",
+          "legendFormat": "{{ namespace }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "value": 0, "color": "red" },
+              { "value": 1, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Container Restarts (last 1h)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "increase(kube_pod_container_status_restarts_total[1h]) > 0",
+          "legendFormat": "{{ namespace }}/{{ pod }}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "bars", "fillOpacity": 80 },
+          "thresholds": {
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 3, "color": "red" }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["cluster", "overview", "kubernetes"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "title": "Cluster Overview",
+  "uid": "cluster-overview"
+}

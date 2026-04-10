@@ -1,0 +1,41 @@
+<!-- Contact Footer -->
+<div class="contact-footer">
+  <p><strong>Let's Connect</strong></p>
+  <ul class="contact-footer__links">
+    <li><a href="mailto:ariansvirsky@gmail.com">📧 Email</a></li>
+    <li><a href="tel:+972528988600">📱 Phone</a></li>
+    <li><a href="https://wa.me/972528988600" target="_blank">💬 WhatsApp</a></li>
+    <li><a href="https://www.linkedin.com/in/arian-svirsky-a0832057/" target="_blank">🔗 LinkedIn</a></li>
+    <li><a href="https://github.com/ariansvi" target="_blank">🐙 GitHub</a></li>
+  </ul>
+</div>
+
+<!-- Sticky header: hide on scroll down, show on scroll up -->
+<script>
+(function() {
+  var header = document.querySelector('.header');
+  if (!header) return;
+
+  var lastScroll = 0;
+  var threshold = 50;
+
+  window.addEventListener('scroll', function() {
+    var currentScroll = window.pageYOffset;
+
+    if (currentScroll <= 0) {
+      header.classList.remove('header--hidden');
+      return;
+    }
+
+    if (currentScroll > lastScroll && currentScroll > threshold) {
+      // Scrolling down
+      header.classList.add('header--hidden');
+    } else {
+      // Scrolling up
+      header.classList.remove('header--hidden');
+    }
+
+    lastScroll = currentScroll;
+  });
+})();
+</script>
