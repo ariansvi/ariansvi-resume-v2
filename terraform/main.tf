@@ -41,6 +41,7 @@ module "dns" {
   project_id  = var.project_id
   domain      = var.domain
   environment = var.environment
+  ingress_ip  = var.ingress_ip
 }
 
 # ─── Artifact Registry ──────────────────────────────────────────────

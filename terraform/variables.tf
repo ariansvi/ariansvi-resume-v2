@@ -26,3 +26,9 @@ variable "cluster_name" {
   type        = string
   default     = "resume-cluster"
 }
+
+variable "ingress_ip" {
+  description = "External IP of the ingress load balancer (set after first deploy)"
+  type        = string
+  default     = ""
+}
