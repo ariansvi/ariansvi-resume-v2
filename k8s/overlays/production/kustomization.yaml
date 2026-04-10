@@ -25,7 +25,7 @@ patches:
 images:
   - name: frontend
     newName: us-central1-docker.pkg.dev/arian-svirsky-resume/resume/frontend
-    newTag: dd30008
+    newTag: d9821fe
   - name: backend
     newName: us-central1-docker.pkg.dev/arian-svirsky-resume/resume/backend
-    newTag: dd30008
+    newTag: d9821fe
