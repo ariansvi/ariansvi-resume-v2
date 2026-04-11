@@ -34,20 +34,8 @@
         {{ partial "cover.html" . }}
 
         <div class="post-content">
-          {{ if .Params.showFullContent }}
-            {{ .Content }}
-          {{ else if .Description }}
-            <p>{{ .Description | markdownify }}</p>
-          {{ else }}
-            {{ .Summary }}
-          {{ end }}
+          {{ .Content }}
         </div>
-
-        {{ if not .Params.showFullContent }}
-           <div>
-            <a class="read-more button inline" href="{{ .RelPermalink }}">[{{ $.Site.Params.ReadMore }}]</a>
-          </div>
-        {{ end }}
       </article>
     {{ end }}
 
