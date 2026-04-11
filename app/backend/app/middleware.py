@@ -49,7 +49,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
                 "x-forwarded-for", ""
             ).split(",")[0].strip()
             if not ip:
-                ip = request.client.host if request.client else None
+                ip = request.client.host if request.client else ""
 
             country = request.headers.get(
                 "cf-ipcountry",

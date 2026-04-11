@@ -80,7 +80,7 @@ async def record_visit(
     # Get real IP (behind ingress/proxy)
     ip = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
     if not ip:
-        ip = request.client.host if request.client else None
+        ip = request.client.host if request.client else ""
 
     # GeoIP
     geo = await _geoip_lookup(ip or "")
