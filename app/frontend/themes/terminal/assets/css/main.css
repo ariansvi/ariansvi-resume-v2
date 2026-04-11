@@ -200,6 +200,11 @@ img {
   overflow: hidden;
 }
 
+/* Profile picture sizing */
+img[alt="Arian Svirsky"] {
+  max-width: 200px;
+}
+
 img.left {
   margin-right: auto;
 }

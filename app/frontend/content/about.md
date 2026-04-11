@@ -17,7 +17,7 @@ I don't have a manifesto, but I do have opinions:
 
 ## Current stack
 
-Kubernetes (EKS/GKE/AKS) · Terraform · Pulumi · GitHub Actions · ArgoCD · Datadog · Prometheus · Python · Bash · Docker — and whatever else the problem requires.
+Kubernetes (EKS/GKE) · Terraform · Pulumi · GitHub Actions · ArgoCD · Datadog · Prometheus · Python · Bash · Docker — and whatever else the problem requires.
 
 ## This site
 

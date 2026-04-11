@@ -251,6 +251,7 @@ def get_dashboard(
                 "browser": v.browser,
                 "os": v.os,
                 "device": v.device_type,
+                "ip": v.ip_address or "-",
                 "time": v.created_at.isoformat() if v.created_at else None,
             }
             for v in recent

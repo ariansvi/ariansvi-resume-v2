@@ -1,9 +1,14 @@
 FROM hugomods/hugo:go-0.139.0 AS builder
 
+ARG HUGO_BASEURL=""
 WORKDIR /src
 COPY . .
 
-RUN hugo --minify
+RUN if [ -n "$HUGO_BASEURL" ]; then \
+      hugo --minify --baseURL "$HUGO_BASEURL"; \
+    else \
+      hugo --minify; \
+    fi
 
 FROM nginx:1.27-alpine
 

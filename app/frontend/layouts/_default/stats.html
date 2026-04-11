@@ -59,6 +59,7 @@
     padding: 8px 12px;
     text-align: left;
     border-bottom: 1px solid #333;
+    white-space: nowrap;
   }
   .recent-table th {
     color: var(--accent);
@@ -214,10 +215,11 @@ async function loadStats() {
       <h3 style="color:var(--accent);margin-top:30px">Recent Visitors</h3>
       <div style="overflow-x:auto">
         <table class="recent-table">
-          <tr><th>When</th><th>Location</th><th>Page</th><th>Browser</th><th>OS</th><th>Device</th></tr>
+          <tr><th>When</th><th>IP</th><th>Location</th><th>Page</th><th>Browser</th><th>OS</th><th>Device</th></tr>
           ${d.recent.map(v => `
             <tr>
               <td>${v.time ? timeAgo(v.time) : '-'}</td>
+              <td>${v.ip || '-'}</td>
               <td><span class="flag">${countryFlag(v.country)}</span>${v.city ? v.city+', ' : ''}${v.country || 'Unknown'}</td>
               <td>${v.path}</td>
               <td>${v.browser || '-'}</td>

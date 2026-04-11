@@ -2,6 +2,8 @@ services:
   frontend:
     build:
       context: ./app/frontend
+      args:
+        - HUGO_BASEURL=http://localhost:8080/
     ports:
       - "8080:80"
     depends_on:

@@ -10,11 +10,11 @@ DevOps Engineer. I build and run cloud-native infrastructure.
 
 ---
 
-Right now I'm building multi-cloud Kubernetes platforms at [Descope](https://www.descope.com) — 25+ microservices across AWS, GCP, and Azure, deployed to 4 regions, serving millions of authentication requests.
+Right now I'm building multi-cloud Kubernetes platforms at [Descope](https://www.descope.com) — 25+ microservices across AWS and GCP, deployed to 4 regions, serving millions of authentication requests.
 
 Before that, I spent 6 years at [Palo Alto Networks](https://www.paloaltonetworks.com) where I migrated the Cortex XSOAR platform from EC2 to Kubernetes and figured out how to run Docker-in-Docker securely inside a security product.
 
-I've been doing this since 2014. I like solving infrastructure problems that don't have Stack Overflow answers.
+I've been doing this since 2014. I like solving infrastructure problems that don't have easy answers.
 
 ---
 
