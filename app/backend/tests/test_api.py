@@ -48,15 +48,17 @@ class TestAnalytics:
         assert r.status_code == 201
         assert r.json()["status"] == "recorded"
 
-    def test_get_stats(self):
+    def test_get_dashboard(self):
         client.post("/api/analytics/visit", json={"path": "/"})
         client.post("/api/analytics/visit", json={"path": "/about"})
 
-        r = client.get("/api/analytics/stats")
+        r = client.get(
+            "/api/analytics/dashboard",
+            auth=("arian", "devops2024"),
+        )
         assert r.status_code == 200
         data = r.json()
-        assert data["total_visits"] >= 2
-        assert data["unique_paths"] >= 1
+        assert data["summary"]["total_visits"] >= 2
         assert isinstance(data["top_pages"], list)
 
 
