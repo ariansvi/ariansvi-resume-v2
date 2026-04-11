@@ -4,24 +4,21 @@ title: "About"
 
 ![Arian Svirsky](/images/arian.jpg)
 
-# About
+Started in tech support in 2014. Moved to Linux administration, then hosting infrastructure, then eCommerce platforms, then Docker, then Kubernetes, then multi-cloud. Each step was a natural progression — the problems kept getting more interesting.
 
-I've been doing infrastructure and DevOps since 2014 — starting from Linux sysadmin work, through the Docker revolution, and into the Kubernetes era.
+## Engineering principles
 
-## How I think about infrastructure
+I don't have a manifesto, but I do have opinions:
 
-- **If it's not in Git, it doesn't exist** — everything is code, versioned, and reviewable
-- **Automate the toil** — humans make decisions, machines execute
-- **Observe everything** — dashboards, alerts, traces, logs — the full picture
-- **Design for failure** — things break, systems should recover
-- **Keep it simple** — complexity is a bug
+- **Everything is code.** Infrastructure, configuration, policy, deployment — if it's manual, it's broken.
+- **Monitoring isn't optional.** If you deploy something and can't tell whether it's working, you haven't deployed it.
+- **Complexity is debt.** Every abstraction layer you add is a layer someone has to debug at 3am.
+- **Automation should make humans faster,** not replace them. The goal is to eliminate toil, not judgment.
 
-## What I'm doing now
+## Current stack
 
-Working at **Descope**, building the infrastructure behind an identity platform that handles millions of auth requests. Multi-cloud (AWS, GCP, Azure), multi-region, 25+ microservices — all managed with Pulumi and deployed via GitHub Actions.
+Kubernetes (EKS/GKE/AKS) · Terraform · Pulumi · GitHub Actions · ArgoCD · Datadog · Prometheus · Python · Bash · Docker — and whatever else the problem requires.
 
-Before that, spent 6 years at **Palo Alto Networks** (Demisto → Cortex XSOAR), where I led the migration from EC2 VMs to Kubernetes and solved Docker-in-Docker security challenges for a SOAR product that executes customer automation in isolated containers.
+## This site
 
-## Outside of work
-
-I build things like this website — not because I need a resume, but because infrastructure is what I do for fun too.
+I built this as a weekend project that got out of hand (in a good way). The full architecture is documented in the [source repo](https://github.com/ariansvi/ariansvi-resume-v2). It's intentionally over-engineered — that's the point.

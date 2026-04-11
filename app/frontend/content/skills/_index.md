@@ -2,4 +2,4 @@
 title: "Stack"
 ---
 
-Tools and technologies I use daily (or have battle scars from).
+Tools I use, and occasionally have opinions about.

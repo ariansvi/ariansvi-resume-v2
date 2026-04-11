@@ -27,7 +27,7 @@ theme = "terminal"
     [languages.en.params]
       subtitle = "Building scalable systems, one cluster at a time"
       owner = "Arian Svirsky"
-      keywords = "devops, kubernetes, terraform, docker, cloud, sre, infrastructure"
+      keywords = "devops, infrastructure, kubernetes, terraform, engineering"
       copyright = "Arian Svirsky"
       menuMore = "Show more"
       readMore = "Read more"

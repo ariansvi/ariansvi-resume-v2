@@ -2,4 +2,4 @@
 title: "Work"
 ---
 
-What I've built, broken, and fixed along the way.
+Engineering problems I've worked on, from most recent.

@@ -1,27 +1,31 @@
 ---
-title: "Palo Alto Networks — VM to Kubernetes Migration"
+title: "Migrating a Security Product to Kubernetes"
 weight: 2
-tags: ["kubernetes", "docker", "aws", "jenkins", "security"]
+tags: ["kubernetes", "docker", "security", "migration"]
 ---
 
-**Aug 2018 – Sep 2024** | 6 years | Palo Alto Networks (Demisto → Cortex XSOAR)
+**Palo Alto Networks** (Cortex XSOAR, formerly Demisto) — 6 years
 
-Joined Demisto pre-acquisition, stayed through the Palo Alto Networks integration, grew from DevOps Engineer to Principal.
+Joined Demisto as a DevOps Engineer, stayed through the Palo Alto Networks acquisition, left as Principal DevOps Engineer.
 
-### The big project: EC2 → Kubernetes
+### The hard problem: Docker-in-Docker on Kubernetes
 
-Led the migration of the entire Cortex XSOAR platform from AWS EC2 VMs to Kubernetes. This wasn't a straightforward lift-and-shift — XSOAR is a SOAR product that runs customer automation playbooks inside Docker containers.
+Cortex XSOAR is a SOAR product — it runs customer automation playbooks inside Docker containers. When we moved from EC2 to Kubernetes, the big question was: how do you securely run Docker-in-Docker inside Kubernetes pods?
 
-**The DIND challenge:** The platform needs to spin up Docker containers dynamically (customer integrations run in isolated containers). Running Docker-in-Docker on Kubernetes with proper security isolation was the hardest problem I've solved. We had to balance:
-- Container escape prevention (this is a security product)
-- Dynamic container scheduling inside K8s pods
-- Resource isolation between customer workloads
-- Network policies for multi-tenant isolation
+This isn't a "just add privileged mode" situation. This is a security product. Customers run untrusted integration code. Container escapes aren't theoretical — they're the threat model.
 
-### Other things I built
+We solved it with a combination of:
+- Custom container runtime configuration
+- Network policies for strict workload isolation
+- Resource limits that actually work under dynamic scheduling
+- A security review process that would make most companies cry
 
-- CI/CD pipeline infrastructure — Jenkins shared libraries, GitLab CI, later migrated parts to GitHub Actions
+It took months, broke things, and taught me more about container security than any certification ever could.
+
+### The rest of the 6 years
+
+- Built the CI/CD pipeline from Jenkins to GitLab CI
+- Terraform'd all of AWS (VPC, EKS, RDS, S3, the works)
+- Evolved monitoring from Nagios to Prometheus + Grafana
 - Integrated Demisto's infrastructure into the Palo Alto Networks ecosystem post-acquisition
-- Terraform modules for AWS infrastructure (VPC, EKS, RDS, S3)
-- Monitoring stack evolution: Nagios → Prometheus + Grafana
-- Mentored junior DevOps engineers as Principal
+- Eventually became Principal — meaning I got to make architecture decisions and mentor the team

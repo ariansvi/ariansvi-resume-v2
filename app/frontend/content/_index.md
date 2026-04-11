@@ -6,22 +6,16 @@ title: "Home"
 
 # Arian Svirsky
 
-**DevOps Engineer** focused on building scalable systems, observability, and production-grade infrastructure.
+DevOps Engineer. I build and run cloud-native infrastructure.
 
 ---
 
-I build and operate cloud-native platforms — from bare-metal Linux to multi-cloud Kubernetes at scale. Currently running production workloads across 4 global regions at Descope.
+Right now I'm building multi-cloud Kubernetes platforms at [Descope](https://www.descope.com) — 25+ microservices across AWS, GCP, and Azure, deployed to 4 regions, serving millions of authentication requests.
 
-### Things I work on
+Before that, I spent 6 years at [Palo Alto Networks](https://www.paloaltonetworks.com) where I migrated the Cortex XSOAR platform from EC2 to Kubernetes and figured out how to run Docker-in-Docker securely inside a security product.
 
-- Migrating workloads from VMs to Kubernetes (and solving the hard parts — DIND, security, networking)
-- Multi-cloud infrastructure with Terraform and Pulumi across AWS, GCP, and Azure
-- CI/CD pipelines that actually work — GitHub Actions, GitLab CI, Jenkins, ArgoCD
-- Monitoring and observability — because you can't fix what you can't see
-- Making deployments boring (in a good way)
+I've been doing this since 2014. I like solving infrastructure problems that don't have Stack Overflow answers.
 
-### About this site
+---
 
-This website runs on **GKE Autopilot**, deployed via **ArgoCD**, infrastructure managed by **Terraform**, images built by **GitHub Actions**, monitored by **Prometheus + Grafana**. The code is the documentation.
-
-[Browse the source code →](https://github.com/ariansvi/ariansvi-resume-v2)
+This site is itself a DevOps project — [GKE Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview), [Terraform](https://github.com/ariansvi/ariansvi-resume-v2/tree/main/terraform), [ArgoCD](https://argo-cd.readthedocs.io/), [GitHub Actions](https://github.com/ariansvi/ariansvi-resume-v2/actions), [Prometheus + Grafana](https://prometheus.io/). Source code is [here](https://github.com/ariansvi/ariansvi-resume-v2).

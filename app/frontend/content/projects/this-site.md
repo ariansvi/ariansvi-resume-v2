@@ -1,53 +1,34 @@
 ---
-title: "This Website — A DevOps Showcase"
-tags: ["kubernetes", "terraform", "argocd", "docker", "github-actions", "python"]
+title: "ariansvi.com — Over-Engineered on Purpose"
+tags: ["kubernetes", "terraform", "argocd", "github-actions", "python"]
 ---
 
-This resume website is a living DevOps project that demonstrates production-grade infrastructure practices.
+A personal website that runs on the same infrastructure patterns I use in production. Intentionally over-engineered — the architecture is the content.
 
-## Architecture Pipeline
+### How it works
 
 ```
- ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
- │  1.CODE  │───▶│ 2.BUILD  │───▶│ 3.DEPLOY │───▶│ 4.SERVE  │───▶│5.MONITOR │
- │          │    │          │    │          │    │          │    │          │
- │ Hugo     │    │ GitHub   │    │ ArgoCD   │    │ GKE      │    │Prometheus│
- │ FastAPI  │    │ Actions  │    │ GitOps   │    │Autopilot │    │ Grafana  │
- │ Terraform│    │ Docker   │    │ Kustomize│    │ Ingress  │    │ Alerts   │
- │ K8s YAML │    │ pytest   │    │ Auto-sync│    │ TLS/SSL  │    │Dashboards│
- └──────────┘    └──────────┘    └──────────┘    └──────────┘    └──────────┘
-
- ┌─────────────────────────────────────────────────────────────────────────────┐
- │          INFRASTRUCTURE LAYER — managed by Terraform                       │
- │  GKE Autopilot │ VPC + DNS │ Artifact Registry │ IAM + OIDC │ GCS Buckets │
- └─────────────────────────────────────────────────────────────────────────────┘
-
-                         ~5 min from git push to live
+  git push  →  GitHub Actions  →  Artifact Registry  →  ArgoCD  →  GKE
+              (lint, test, build)  (Docker images)     (GitOps sync)
 ```
 
-## How It Works
+The full pipeline: push code, GitHub Actions runs linting + tests + Docker builds, pushes images to Google Artifact Registry, updates the Kustomize image tags, ArgoCD detects the change and rolls out to GKE Autopilot. About 5 minutes end-to-end.
 
-1. **Code** — Push to `main` branch (Hugo frontend, FastAPI backend, Terraform, K8s manifests)
-2. **Build** — GitHub Actions lints, tests, builds Docker images, pushes to Artifact Registry
-3. **Deploy** — CI updates image tags in Git → ArgoCD detects change → rolls out to GKE
-4. **Serve** — GKE Autopilot runs the pods behind Ingress-NGINX with Let's Encrypt TLS
-5. **Monitor** — Prometheus scrapes metrics, Grafana dashboards track uptime and resources
+### Tech stack
 
-## Tech Stack
+- **Infrastructure:** Terraform (GKE Autopilot, VPC, Cloud DNS, IAM, Artifact Registry)
+- **Frontend:** Hugo static site served by Nginx
+- **Backend:** Python FastAPI with SQLite (visitor analytics, health checks)
+- **Deployment:** ArgoCD (GitOps), Kustomize (base + overlays)
+- **TLS:** cert-manager + Let's Encrypt (automated)
+- **Monitoring:** Prometheus + Grafana
+- **CI/CD:** GitHub Actions (5 parallel jobs: lint Python, lint Dockerfiles, lint Terraform, validate Kustomize, run tests)
 
-| Layer | Technology |
-|-------|-----------|
-| IaC | Terraform (GKE, VPC, DNS, IAM, Artifact Registry) |
-| Container | Docker multi-stage builds |
-| Orchestration | GKE Autopilot (free-tier management) |
-| Deployment | ArgoCD GitOps + GitHub Actions CI/CD |
-| Frontend | Hugo static site + Nginx |
-| Backend | Python FastAPI + SQLite |
-| Ingress | Ingress-NGINX + cert-manager (Let's Encrypt) |
-| Monitoring | Prometheus + Grafana |
-| Manifests | Kustomize (base + overlays) |
-| Security | Workload Identity, OIDC, NetworkPolicies, RBAC |
+### What I learned building it
 
-## Source Code
+- GKE Autopilot blocks `kube-system` leader election — cert-manager needs `global.leaderElection.namespace` set
+- Hairpin NAT on GKE means cert-manager can't self-check HTTP-01 challenges from inside the cluster — solved with `hostAliases`
+- NetworkPolicies with default-deny break cert-manager ACME solvers — need explicit allow rules
+- Hugo module system and Go module v3 path conventions don't play well together — vendored the theme instead
 
-Everything is open source: [github.com/ariansvi/ariansvi-resume-v2](https://github.com/ariansvi/ariansvi-resume-v2)
+[Source code →](https://github.com/ariansvi/ariansvi-resume-v2)

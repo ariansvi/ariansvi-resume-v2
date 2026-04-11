@@ -1,23 +1,19 @@
 ---
-title: "Descope — Multi-Cloud Identity Infrastructure"
+title: "Building a Multi-Cloud Identity Platform"
 weight: 1
-tags: ["kubernetes", "pulumi", "aws", "gcp", "azure", "datadog"]
+tags: ["kubernetes", "pulumi", "multi-cloud", "datadog"]
 ---
 
-**Sep 2024 – Present** | Descope
+**Descope** — identity and authentication infrastructure
 
-Building the infrastructure behind an identity and authentication platform.
+The platform serves millions of auth requests across 4 global regions. My job is making sure the infrastructure behind it is reliable, observable, and doesn't wake anyone up at night.
 
-### What I'm building
+### The interesting parts
 
-- **Multi-cloud K8s platform** — 25+ microservices across AWS EKS, GCP GKE, and Azure AKS, all managed with Pulumi (TypeScript)
-- **4-region production** — US, EU, APAC, Canada, with automated failover
-- **GitOps deployment pipeline** — GitHub Actions → version cut → staging promotion → production rollout. Automated twice-weekly RC, weekly production
-- **Full observability stack** — Datadog APM, logs, custom dashboards, SLOs, and alerting across all regions
-- **Infrastructure services** — Temporal workflows, RabbitMQ, Elasticsearch, Redis clusters, Cloudflare CDN + WAF
+**Multi-cloud with Pulumi** — We run on AWS (primary), GCP, and Azure simultaneously. 25+ microservices, all defined in TypeScript with Pulumi. Not Terraform — and I have opinions about why (ask me over coffee).
 
-### Problems I've solved
+**Automated promotion pipeline** — Code flows through Sandbox → RC → Production with automated version cuts. RC deploys happen twice a week, production goes out weekly. The whole pipeline runs without human intervention unless something breaks.
 
-- Reduced deployment time by 60% by redesigning the CI/CD pipeline
-- Built the promotion flow from scratch: Sandbox → RC → Production with automated gates
-- Designed cross-region DNS failover strategy
+**Observability at scale** — Datadog APM, logs, custom dashboards, SLOs across every region. When something degrades in Singapore, we know about it before the customer does.
+
+**The supporting cast** — Temporal for workflows, RabbitMQ for messaging, Elasticsearch for search, Redis for caching, Cloudflare for CDN and WAF. Each one has its own war stories.
