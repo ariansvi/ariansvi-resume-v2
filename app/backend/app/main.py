@@ -6,6 +6,7 @@ from prometheus_client import make_asgi_app
 
 from app.config import settings
 from app.database import init_db
+from app.middleware import MetricsMiddleware
 from app.routers import analytics, contact, health
 
 logging.basicConfig(
@@ -28,6 +29,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(MetricsMiddleware)
 
 # Prometheus metrics endpoint
 metrics_app = make_asgi_app()

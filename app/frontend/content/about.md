@@ -28,8 +28,3 @@ Over the past decade, I've worked across startups and scale-ups, building system
 
 Currently working as a DevOps Engineer at **Descope**, managing multi-cloud Kubernetes infrastructure (AWS, GCP, Azure) with Pulumi, serving production workloads across 4+ regions globally.
 
-## Connect
-
-- **GitHub:** [ariansvi](https://github.com/ariansvi)
-- **LinkedIn:** [Arian Svirsky](https://www.linkedin.com/in/arian-svirsky-a0832057/)
-- **Email:** [ariansvirsky@gmail.com](mailto:ariansvirsky@gmail.com)
