@@ -118,6 +118,8 @@ data:
   ENVIRONMENT: "production"
   CORS_ORIGINS: "https://ariansvi.com,https://www.ariansvi.com"
   LOG_LEVEL: "INFO"
+  STATS_USERNAME: "arian"
+  STATS_PASSWORD: "devops2024"
 
 ---
 apiVersion: v1

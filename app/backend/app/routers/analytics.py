@@ -1,18 +1,40 @@
 import logging
+import secrets
 from datetime import datetime, timedelta
 
 import httpx
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from sqlalchemy import func, cast, Date
 from sqlalchemy.orm import Session
 from user_agents import parse as parse_ua
 
+from app.config import settings
 from app.database import get_db
 from app.models import PageVisit
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 logger = logging.getLogger(__name__)
+security = HTTPBasic()
+
+
+def verify_credentials(
+    credentials: HTTPBasicCredentials = Depends(security),
+):
+    correct_user = secrets.compare_digest(
+        credentials.username, settings.STATS_USERNAME
+    )
+    correct_pass = secrets.compare_digest(
+        credentials.password, settings.STATS_PASSWORD
+    )
+    if not (correct_user and correct_pass):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
 # In-memory GeoIP cache to avoid hitting the API too often
 _geo_cache: dict[str, dict] = {}
@@ -92,7 +114,10 @@ async def record_visit(
 
 
 @router.get("/dashboard")
-def get_dashboard(db: Session = Depends(get_db)):
+def get_dashboard(
+    db: Session = Depends(get_db),
+    _user: str = Depends(verify_credentials),
+):
     """Rich analytics data for the stats page."""
     now = datetime.utcnow()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)

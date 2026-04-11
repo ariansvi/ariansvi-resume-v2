@@ -10,6 +10,8 @@ class Settings:
         "CORS_ORIGINS", "http://localhost,http://localhost:8080"
     ).split(",")
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    STATS_USERNAME: str = os.getenv("STATS_USERNAME", "arian")
+    STATS_PASSWORD: str = os.getenv("STATS_PASSWORD", "devops2024")
 
 
 settings = Settings()

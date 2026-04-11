@@ -139,9 +139,33 @@ function makeChart(id, type, labels, data, label) {
   });
 }
 
+let authHeader = null;
+
+function promptAuth() {
+  const user = prompt('Username:');
+  if (!user) return false;
+  const pass = prompt('Password:');
+  if (!pass) return false;
+  authHeader = 'Basic ' + btoa(user + ':' + pass);
+  return true;
+}
+
 async function loadStats() {
+  if (!authHeader && !promptAuth()) {
+    document.getElementById('stats-content').innerHTML =
+      '<p style="color:#999;text-align:center;padding:40px">Authentication required to view stats.</p>';
+    return;
+  }
+
   try {
-    const r = await fetch('/api/analytics/dashboard');
+    const r = await fetch('/api/analytics/dashboard', {
+      headers: { 'Authorization': authHeader }
+    });
+    if (r.status === 401) {
+      authHeader = null;
+      promptAuth();
+      return loadStats();
+    }
     const d = await r.json();
 
     const el = document.getElementById('stats-content');
