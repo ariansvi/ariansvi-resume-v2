@@ -36,6 +36,7 @@ def verify_credentials(
         )
     return credentials.username
 
+
 # In-memory GeoIP cache to avoid hitting the API too often
 _geo_cache: dict[str, dict] = {}
 
