@@ -10,6 +10,21 @@
   </ul>
 </div>
 
+<!-- Track page visit -->
+<script>
+(function() {
+  if (window.location.pathname === '/stats' || window.location.pathname === '/stats/') return;
+  fetch('/api/analytics/visit', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      path: window.location.pathname,
+      referrer: document.referrer || null
+    })
+  }).catch(function(){});
+})();
+</script>
+
 <!-- Sticky header: hide on scroll down, show on scroll up -->
 <script>
 (function() {

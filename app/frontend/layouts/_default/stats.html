@@ -1,0 +1,231 @@
+{{ define "main" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+<style>
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .stat-card {
+    background: var(--background);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .number {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-card .label {
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 4px;
+  }
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 24px 0;
+  }
+  @media (max-width: 768px) {
+    .chart-row { grid-template-columns: 1fr; }
+  }
+  .chart-box {
+    background: var(--background);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .chart-box h3 {
+    margin: 0 0 12px 0;
+    font-size: 1em;
+    color: var(--accent);
+  }
+  .chart-box canvas {
+    max-height: 280px;
+  }
+  .recent-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.85em;
+  }
+  .recent-table th, .recent-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+  }
+  .recent-table th {
+    color: var(--accent);
+    font-weight: bold;
+  }
+  .recent-table tr:hover {
+    background: rgba(255,255,255,0.03);
+  }
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+  }
+  .flag { margin-right: 6px; }
+</style>
+
+<div id="stats-content">
+  <div class="loading">Loading analytics...</div>
+</div>
+
+<script>
+const COLORS = [
+  '#f4c430','#e8913a','#e05a47','#c74b8b','#8b5cf6',
+  '#6366f1','#3b82f6','#06b6d4','#10b981','#84cc16'
+];
+
+function countryFlag(country) {
+  const flags = {
+    'Israel':'🇮🇱','United States':'🇺🇸','Germany':'🇩🇪','France':'🇫🇷',
+    'United Kingdom':'🇬🇧','Canada':'🇨🇦','Netherlands':'🇳🇱','India':'🇮🇳',
+    'Australia':'🇦🇺','Japan':'🇯🇵','Brazil':'🇧🇷','Spain':'🇪🇸',
+    'Italy':'🇮🇹','Russia':'🇷🇺','China':'🇨🇳','South Korea':'🇰🇷',
+    'Sweden':'🇸🇪','Norway':'🇳🇴','Poland':'🇵🇱','Ukraine':'🇺🇦',
+    'Singapore':'🇸🇬','Ireland':'🇮🇪','Switzerland':'🇨🇭','Belgium':'🇧🇪',
+    'Romania':'🇷🇴','Unknown':'🌍','Local':'🏠',
+  };
+  return flags[country] || '🌍';
+}
+
+function timeAgo(iso) {
+  const diff = (Date.now() - new Date(iso+'Z').getTime()) / 1000;
+  if (diff < 60) return Math.floor(diff) + 's ago';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+
+function makeChart(id, type, labels, data, label) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: type,
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label || '',
+        data: data,
+        backgroundColor: type === 'line' ? 'rgba(244,196,48,0.2)' :
+          COLORS.slice(0, data.length),
+        borderColor: type === 'line' ? '#f4c430' :
+          COLORS.slice(0, data.length),
+        borderWidth: type === 'line' ? 2 : 1,
+        fill: type === 'line',
+        tension: 0.3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: type !== 'line' && type !== 'bar', labels: { color: '#ccc', font: { size: 11 } } },
+      },
+      scales: type === 'line' || type === 'bar' ? {
+        x: { ticks: { color: '#999', font: { size: 10 } }, grid: { color: '#222' } },
+        y: { ticks: { color: '#999' }, grid: { color: '#222' }, beginAtZero: true },
+      } : undefined,
+    }
+  });
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch('/api/analytics/dashboard');
+    const d = await r.json();
+
+    const el = document.getElementById('stats-content');
+    el.innerHTML = `
+      <h1>Live Stats</h1>
+      <p style="color:#999;margin-bottom:20px">Real-time visitor analytics — powered by FastAPI + SQLite + Chart.js</p>
+
+      <div class="stats-grid">
+        <div class="stat-card"><span class="number">${d.summary.total_visits}</span><span class="label">Total Visits</span></div>
+        <div class="stat-card"><span class="number">${d.summary.unique_visitors}</span><span class="label">Unique Visitors</span></div>
+        <div class="stat-card"><span class="number">${d.summary.visits_today}</span><span class="label">Today</span></div>
+        <div class="stat-card"><span class="number">${d.summary.visits_this_week}</span><span class="label">This Week</span></div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-box"><h3>Visits (Last 30 Days)</h3><canvas id="chart-daily"></canvas></div>
+        <div class="chart-box"><h3>Countries</h3><canvas id="chart-countries"></canvas></div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-box"><h3>Browsers</h3><canvas id="chart-browsers"></canvas></div>
+        <div class="chart-box"><h3>Operating Systems</h3><canvas id="chart-os"></canvas></div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-box"><h3>Device Types</h3><canvas id="chart-devices"></canvas></div>
+        <div class="chart-box"><h3>Top Pages</h3><canvas id="chart-pages"></canvas></div>
+      </div>
+
+      <h3 style="color:var(--accent);margin-top:30px">Recent Visitors</h3>
+      <div style="overflow-x:auto">
+        <table class="recent-table">
+          <tr><th>When</th><th>Location</th><th>Page</th><th>Browser</th><th>OS</th><th>Device</th></tr>
+          ${d.recent.map(v => `
+            <tr>
+              <td>${v.time ? timeAgo(v.time) : '-'}</td>
+              <td><span class="flag">${countryFlag(v.country)}</span>${v.city ? v.city+', ' : ''}${v.country || 'Unknown'}</td>
+              <td>${v.path}</td>
+              <td>${v.browser || '-'}</td>
+              <td>${v.os || '-'}</td>
+              <td>${v.device || '-'}</td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+
+      <p style="color:#666;font-size:0.8em;margin-top:30px;text-align:center">
+        No cookies. No tracking scripts. Just server-side analytics.<br>
+        Built with FastAPI + SQLite + Chart.js | Auto-refreshes every 30s
+      </p>
+    `;
+
+    // Render charts
+    makeChart('chart-daily', 'line',
+      d.daily.map(x => x.date.slice(5)),
+      d.daily.map(x => x.count), 'Visits');
+
+    makeChart('chart-countries', 'doughnut',
+      d.by_country.map(x => countryFlag(x.country)+' '+x.country),
+      d.by_country.map(x => x.count));
+
+    makeChart('chart-browsers', 'doughnut',
+      d.by_browser.map(x => x.browser),
+      d.by_browser.map(x => x.count));
+
+    makeChart('chart-os', 'doughnut',
+      d.by_os.map(x => x.os),
+      d.by_os.map(x => x.count));
+
+    makeChart('chart-devices', 'pie',
+      d.by_device.map(x => x.device),
+      d.by_device.map(x => x.count));
+
+    makeChart('chart-pages', 'bar',
+      d.top_pages.map(x => x.path),
+      d.top_pages.map(x => x.count), 'Views');
+
+  } catch(e) {
+    document.getElementById('stats-content').innerHTML =
+      '<p style="color:#e05a47">Failed to load analytics. The API might be starting up.</p>';
+  }
+}
+
+loadStats();
+setInterval(loadStats, 30000);
+</script>
+{{ end }}

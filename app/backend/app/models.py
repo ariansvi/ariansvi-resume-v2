@@ -13,7 +13,11 @@ class PageVisit(Base):
     referrer = Column(String(1024), nullable=True)
     user_agent = Column(String(512), nullable=True)
     ip_address = Column(String(45), nullable=True)
-    country = Column(String(2), nullable=True)
+    country = Column(String(64), nullable=True)
+    city = Column(String(128), nullable=True)
+    browser = Column(String(64), nullable=True)
+    os = Column(String(64), nullable=True)
+    device_type = Column(String(16), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
