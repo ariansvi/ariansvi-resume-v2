@@ -1,4 +1,3 @@
-import time
 from user_agents import parse as parse_ua
 
 from prometheus_client import Counter, Histogram, Gauge
