@@ -1,30 +1,27 @@
 ---
-title: "About Me"
+title: "About"
 ---
 
 ![Arian Svirsky](/images/arian.jpg)
 
-# Arian Svirsky
+# About
 
-**Senior DevOps Engineer** — Building production infrastructure since 2014.
+I've been doing infrastructure and DevOps since 2014 — starting from Linux sysadmin work, through the Docker revolution, and into the Kubernetes era.
 
----
+## How I think about infrastructure
 
-## Background
+- **If it's not in Git, it doesn't exist** — everything is code, versioned, and reviewable
+- **Automate the toil** — humans make decisions, machines execute
+- **Observe everything** — dashboards, alerts, traces, logs — the full picture
+- **Design for failure** — things break, systems should recover
+- **Keep it simple** — complexity is a bug
 
-I'm a DevOps engineer with deep expertise across the entire infrastructure stack — from Linux kernel tuning to Kubernetes cluster architecture, from CI/CD pipeline design to cloud cost optimization.
+## What I'm doing now
 
-Over the past decade, I've worked across startups and scale-ups, building systems that handle millions of requests and maintain high availability. My approach combines automation-first thinking with practical engineering — every system I build is designed to be reproducible, observable, and self-healing.
+Working at **Descope**, building the infrastructure behind an identity platform that handles millions of auth requests. Multi-cloud (AWS, GCP, Azure), multi-region, 25+ microservices — all managed with Pulumi and deployed via GitHub Actions.
 
-## Philosophy
+Before that, spent 6 years at **Palo Alto Networks** (Demisto → Cortex XSOAR), where I led the migration from EC2 VMs to Kubernetes and solved Docker-in-Docker security challenges for a SOAR product that executes customer automation in isolated containers.
 
-- **Infrastructure is code** — if it's not in Git, it doesn't exist
-- **Automate the toil** — humans should make decisions, machines should execute
-- **Observe everything** — you can't fix what you can't see
-- **Fail gracefully** — design for failure, not just success
-- **Keep it simple** — complexity is a bug, not a feature
+## Outside of work
 
-## Current Focus
-
-Currently working as a DevOps Engineer at **Descope**, managing multi-cloud Kubernetes infrastructure (AWS, GCP, Azure) with Pulumi, serving production workloads across 4+ regions globally.
-
+I build things like this website — not because I need a resume, but because infrastructure is what I do for fun too.

@@ -1,30 +1,27 @@
 ---
-title: "Palo Alto Networks — DevOps Engineer → Principal"
+title: "Palo Alto Networks — VM to Kubernetes Migration"
 weight: 2
-tags: ["kubernetes", "docker", "aws", "jenkins", "security", "terraform"]
+tags: ["kubernetes", "docker", "aws", "jenkins", "security"]
 ---
 
-**Aug 2018 – Sep 2024** | 6 years | Tel Aviv, Israel
+**Aug 2018 – Sep 2024** | 6 years | Palo Alto Networks (Demisto → Cortex XSOAR)
 
-Progressed from DevOps Engineer to Principal DevOps Engineer over 6 years, working on the Demisto/Cortex XSOAR platform — a security orchestration, automation, and response (SOAR) product.
+Joined Demisto pre-acquisition, stayed through the Palo Alto Networks integration, grew from DevOps Engineer to Principal.
 
-### DevOps Engineer (Aug 2018 – Apr 2019)
+### The big project: EC2 → Kubernetes
 
-- Joined Demisto (acquired by Palo Alto Networks during this period)
-- Built and maintained CI/CD pipelines for the SOAR platform
-- Managed AWS infrastructure for development and staging environments
+Led the migration of the entire Cortex XSOAR platform from AWS EC2 VMs to Kubernetes. This wasn't a straightforward lift-and-shift — XSOAR is a SOAR product that runs customer automation playbooks inside Docker containers.
 
-### Sr DevOps Engineer (Apr 2019 – Nov 2023)
+**The DIND challenge:** The platform needs to spin up Docker containers dynamically (customer integrations run in isolated containers). Running Docker-in-Docker on Kubernetes with proper security isolation was the hardest problem I've solved. We had to balance:
+- Container escape prevention (this is a security product)
+- Dynamic container scheduling inside K8s pods
+- Resource isolation between customer workloads
+- Network policies for multi-tenant isolation
 
-- **Led the transformation from AWS EC2 VMs to Kubernetes**, migrating the entire platform to containerized workloads
-- Solved complex **Docker-in-Docker (DIND) security challenges** — critical for a security product that runs customer automation playbooks in isolated containers
-- Integrated Demisto into the broader **Palo Alto Networks ecosystem** (Cortex XSOAR)
-- Built and maintained Jenkins pipelines, GitLab CI/CD, and deployment automation
-- Managed large-scale AWS infrastructure with Terraform
+### Other things I built
 
-### Principal DevOps Engineer (Nov 2023 – Sep 2024)
-
-- Technical leadership across DevOps practices for the Cortex XSOAR team
-- Architecture decisions for infrastructure scalability and security
-- Mentored junior DevOps engineers
-- Drove adoption of GitOps and infrastructure-as-code best practices
+- CI/CD pipeline infrastructure — Jenkins shared libraries, GitLab CI, later migrated parts to GitHub Actions
+- Integrated Demisto's infrastructure into the Palo Alto Networks ecosystem post-acquisition
+- Terraform modules for AWS infrastructure (VPC, EKS, RDS, S3)
+- Monitoring stack evolution: Nagios → Prometheus + Grafana
+- Mentored junior DevOps engineers as Principal

@@ -1,5 +1,5 @@
 ---
-title: "Experience"
+title: "Work"
 ---
 
-My career timeline — from Linux sysadmin to multi-cloud Kubernetes architect.
+What I've built, broken, and fixed along the way.

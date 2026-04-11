@@ -1,15 +1,15 @@
 baseURL = "https://ariansvi.com/"
 languageCode = "en-us"
-title = "Arian Svirsky | DevOps Engineer"
+title = "Arian Svirsky | DevOps Engineering"
 theme = "terminal"
 
 [params]
-  showMenuItems = 3
+  showMenuItems = 4
   fullWidthTheme = false
   centerTheme = true
   autoCover = true
   showLastUpdated = false
-  description = "Senior DevOps Engineer | 10+ Years | Kubernetes, Terraform, CI/CD, Cloud Architecture"
+  description = "DevOps Engineer | Infrastructure, Kubernetes, Observability, CI/CD"
 
   [params.logo]
     logoText = "arian@devops:~$"
@@ -22,10 +22,10 @@ theme = "terminal"
 [languages]
   [languages.en]
     languageName = "English"
-    title = "Arian Svirsky | DevOps Engineer"
+    title = "Arian Svirsky | DevOps Engineering"
 
     [languages.en.params]
-      subtitle = "Senior DevOps Engineer"
+      subtitle = "Building scalable systems, one cluster at a time"
       owner = "Arian Svirsky"
       keywords = "devops, kubernetes, terraform, docker, cloud, sre, infrastructure"
       copyright = "Arian Svirsky"
@@ -40,8 +40,8 @@ theme = "terminal"
       weight = 1
 
     [[languages.en.menu.main]]
-      identifier = "experience"
-      name = "Experience"
+      identifier = "work"
+      name = "Work"
       url = "/experience"
       weight = 2
 
@@ -53,12 +53,6 @@ theme = "terminal"
 
     [[languages.en.menu.main]]
       identifier = "skills"
-      name = "Skills"
+      name = "Stack"
       url = "/skills"
       weight = 4
-
-    [[languages.en.menu.main]]
-      identifier = "contact"
-      name = "Contact"
-      url = "/contact"
-      weight = 5

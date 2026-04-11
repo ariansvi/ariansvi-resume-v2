@@ -1,28 +1,18 @@
 ---
-title: "Earlier Career — Linux & Infrastructure"
+title: "The Linux Years — Where It Started"
 weight: 3
-tags: ["linux", "networking", "docker", "ecommerce", "hosting"]
+tags: ["linux", "networking", "hosting", "ecommerce"]
 ---
 
-### inManage — Linux System Administrator
-**Nov 2016 – Aug 2018** | 1 year 10 months | Tel Aviv, Israel
+**2014 – 2018** | inManage, Interhost Networks, Calanit
 
-- Linux system administration for eCommerce platform infrastructure
-- Server provisioning, monitoring, and troubleshooting
-- Managed production environments supporting online retail operations
-- Automation with Bash scripting, configuration management
+Before Kubernetes was cool, I was managing Linux servers.
 
-### Interhost Networks Ltd — Linux Administrator
-**Feb 2015 – Sep 2016** | 1 year 8 months
+### inManage (2016–2018)
+Linux sysadmin for an eCommerce platform. Server provisioning, Bash automation, production firefighting. This is where I first started containerizing things with Docker and realized infrastructure could be code.
 
-- Web hosting infrastructure administration
-- Managed Linux servers (CentOS, Ubuntu) for hosting customers
-- DNS management, SSL certificates, Apache/Nginx configuration
-- Network troubleshooting, firewall rules, server hardening
+### Interhost Networks (2015–2016)
+Web hosting infrastructure — hundreds of customer sites on shared Linux servers. DNS, SSL, Apache/Nginx, firewall rules. Learned more about networking in 18 months than most people learn in years.
 
-### Calanit — Technical Support
-**Jan 2014 – Feb 2015** | 1 year 2 months
-
-- First role in tech — technical support and helpdesk
-- Built foundation in Linux, networking, and troubleshooting
-- Started the journey into DevOps and infrastructure
+### Calanit (2014–2015)
+My first tech job. Technical support. Learned to troubleshoot, learned Linux, and decided infrastructure was my thing.

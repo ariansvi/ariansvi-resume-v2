@@ -1,47 +1,27 @@
 ---
-title: "Technical Skills"
+title: "My Stack"
 ---
 
-## Container Orchestration
-- **Kubernetes** — EKS, GKE, AKS, k3s | Helm, Kustomize, Operators
-- **Docker** — Multi-stage builds, Compose, image optimization, security scanning
-- **Service Mesh** — Istio, Linkerd
+## Orchestration & Containers
+**Kubernetes** (EKS, GKE, AKS, k3s) · **Docker** (multi-stage, Compose, security scanning) · **Helm** · **Kustomize** · **Istio**
 
 ## Infrastructure as Code
-- **Terraform** — Modules, workspaces, remote state, Atlantis
-- **Pulumi** — TypeScript, stack management, custom providers
-- **CloudFormation** — Nested stacks, drift detection
+**Terraform** (modules, remote state, workspaces) · **Pulumi** (TypeScript) · **CloudFormation**
 
 ## CI/CD & GitOps
-- **GitHub Actions** — Custom actions, matrix builds, OIDC, reusable workflows
-- **GitLab CI/CD** — Runners, DAG pipelines, environments, review apps
-- **Jenkins** — Pipeline-as-code, shared libraries, Blue Ocean
-- **ArgoCD** — App-of-apps, sync waves, progressive delivery
-- **Argo Rollouts** — Canary, blue-green, analysis templates
+**GitHub Actions** (OIDC, reusable workflows) · **GitLab CI** · **Jenkins** (shared libraries) · **ArgoCD** (app-of-apps) · **Argo Rollouts** (canary, blue-green)
 
-## Cloud Platforms
-- **AWS** — EKS, EC2, RDS, S3, Lambda, CloudFront, Route53, IAM, VPC
-- **GCP** — GKE, Cloud DNS, Artifact Registry, Cloud SQL, GCS
+## Cloud
+**AWS** (EKS, EC2, RDS, S3, Lambda, Route53, IAM, VPC) · **GCP** (GKE, Cloud DNS, Artifact Registry, GCS) · **Azure** (AKS, Key Vault)
 
-## Monitoring & Observability
-- **Datadog** — APM, logs, dashboards, monitors, SLOs
-- **Prometheus** — PromQL, recording rules, alerting rules
-- **Grafana** — Custom dashboards, alerting, data sources
-- **ELK Stack** — Elasticsearch, Logstash/Fluentd, Kibana
+## Observability
+**Datadog** (APM, logs, SLOs) · **Prometheus** + **Grafana** · **ELK Stack** (Elasticsearch, Fluentd, Kibana)
 
-## Databases
-- **MySQL** — Replication, backup/restore, performance tuning
-- **Elasticsearch** — Cluster management, index lifecycle, mappings
-- **Redis** — Clustering, sentinel, caching patterns
-- **PostgreSQL** — Administration, extensions
+## Data
+**MySQL** (replication, tuning) · **Elasticsearch** (cluster ops, ILM) · **Redis** (sentinel, clustering) · **PostgreSQL**
 
-## Scripting & Programming
-- **Bash** — Production automation, system tooling
-- **Python** — FastAPI, automation scripts, boto3, SDK integrations
-- **TypeScript** — Pulumi IaC, tooling
-- **Go** — CLI tools, basic services
+## Code
+**Bash** (production automation) · **Python** (FastAPI, boto3) · **TypeScript** (Pulumi) · **Go** (CLI tools)
 
 ## Linux & Networking
-- **Linux** — RHEL, Ubuntu, Alpine | systemd, kernel tuning, troubleshooting
-- **Networking** — TCP/IP, DNS, load balancing, VPN, firewall, SSL/TLS
-- **Security** — RBAC, network policies, sealed secrets, OPA, pod security
+**RHEL, Ubuntu, Alpine** · TCP/IP, DNS, load balancing, VPN, SSL/TLS · RBAC, network policies, pod security

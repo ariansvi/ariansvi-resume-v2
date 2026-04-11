@@ -4,32 +4,24 @@ title: "Home"
 
 ![Arian Svirsky](/images/arian.jpg)
 
-# Hey, I'm Arian Svirsky
+# Arian Svirsky
 
-**Senior DevOps Engineer** with 10+ years of experience building, scaling, and automating production infrastructure.
-
-I specialize in turning complex deployment challenges into reliable, self-healing systems. From bare-metal Linux to multi-cloud Kubernetes — I've been through it all.
+**DevOps Engineer** focused on building scalable systems, observability, and production-grade infrastructure.
 
 ---
 
+I build and operate cloud-native platforms — from bare-metal Linux to multi-cloud Kubernetes at scale. Currently running production workloads across 4 global regions at Descope.
 
-### What I Do
+### Things I work on
 
-- **Infrastructure as Code** — Terraform, Pulumi, CloudFormation
-- **Container Orchestration** — Kubernetes (EKS, GKE, AKS), Docker, Helm
-- **CI/CD Pipelines** — GitHub Actions, GitLab CI, Jenkins, ArgoCD
-- **Cloud Platforms** — AWS (primary), GCP
-- **Monitoring & Observability** — Datadog, Prometheus, Grafana, ELK
-- **Scripting & Automation** — Bash, Python, Go
+- Migrating workloads from VMs to Kubernetes (and solving the hard parts — DIND, security, networking)
+- Multi-cloud infrastructure with Terraform and Pulumi across AWS, GCP, and Azure
+- CI/CD pipelines that actually work — GitHub Actions, GitLab CI, Jenkins, ArgoCD
+- Monitoring and observability — because you can't fix what you can't see
+- Making deployments boring (in a good way)
 
----
+### About this site
 
-### About This Site
+This website runs on **GKE Autopilot**, deployed via **ArgoCD**, infrastructure managed by **Terraform**, images built by **GitHub Actions**, monitored by **Prometheus + Grafana**. The code is the documentation.
 
-This website is itself a DevOps project. It runs on **GKE Autopilot**, deployed via **ArgoCD** (GitOps), with infrastructure managed by **Terraform**, Docker images built by **GitHub Actions**, and monitoring via **Prometheus + Grafana**.
-
-[View the source code on GitHub](https://github.com/ariansvi/ariansvi-resume-v2) to see the full architecture.
-
----
-
-> *"Automate everything. Monitor what you automate. Alert on what matters."*
+[Browse the source code →](https://github.com/ariansvi/ariansvi-resume-v2)

@@ -1,24 +1,23 @@
 ---
-title: "Descope — DevOps Engineer"
+title: "Descope — Multi-Cloud Identity Infrastructure"
 weight: 1
-tags: ["kubernetes", "pulumi", "aws", "gcp", "azure", "datadog", "github-actions"]
+tags: ["kubernetes", "pulumi", "aws", "gcp", "azure", "datadog"]
 ---
 
-**Sep 2024 – Present** | DevOps Engineer | Israel (Hybrid)
+**Sep 2024 – Present** | Descope
 
-Multi-cloud Kubernetes infrastructure for an identity and authentication platform.
+Building the infrastructure behind an identity and authentication platform.
 
-### Responsibilities
+### What I'm building
 
-- Manage **25+ microservices** across AWS EKS, GCP GKE, and Azure AKS using **Pulumi (TypeScript)**
-- Production deployments across **4 global regions** (US, EU, APAC, Canada)
-- **CI/CD pipelines** with GitHub Actions — automated version cuts, staging promotion, production rollouts
-- **Observability** with Datadog — APM, logs, custom dashboards, alerting
-- Manage Temporal workflows, RabbitMQ, Elasticsearch, Redis clusters
-- **Cloudflare** CDN, tunneling, DDoS protection, WAF rules
+- **Multi-cloud K8s platform** — 25+ microservices across AWS EKS, GCP GKE, and Azure AKS, all managed with Pulumi (TypeScript)
+- **4-region production** — US, EU, APAC, Canada, with automated failover
+- **GitOps deployment pipeline** — GitHub Actions → version cut → staging promotion → production rollout. Automated twice-weekly RC, weekly production
+- **Full observability stack** — Datadog APM, logs, custom dashboards, SLOs, and alerting across all regions
+- **Infrastructure services** — Temporal workflows, RabbitMQ, Elasticsearch, Redis clusters, Cloudflare CDN + WAF
 
-### Key Achievements
+### Problems I've solved
 
-- Built automated promotion flow: Sandbox → RC (twice weekly) → Production (weekly)
-- Designed multi-region failover strategy
-- Reduced deployment time by 60% through pipeline optimization
+- Reduced deployment time by 60% by redesigning the CI/CD pipeline
+- Built the promotion flow from scratch: Sandbox → RC → Production with automated gates
+- Designed cross-region DNS failover strategy

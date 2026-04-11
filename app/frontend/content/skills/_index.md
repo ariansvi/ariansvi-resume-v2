@@ -1,5 +1,5 @@
 ---
-title: "Skills"
+title: "Stack"
 ---
 
-A breakdown of my technical toolkit, organized by domain.
+Tools and technologies I use daily (or have battle scars from).
