@@ -94,7 +94,7 @@ jobs:
         run: |
           TAG=${{ needs.build-frontend.outputs.tag }}
           cd k8s/overlays/production
-          sed -i "s/newTag: .*/newTag: ${TAG}/" kustomization.yaml
+          sed -i "s/newTag: .*/newTag: \"${TAG}\"/" kustomization.yaml
 
       - name: Commit and push
         run: |
