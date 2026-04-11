@@ -139,7 +139,7 @@ function makeChart(id, type, labels, data, label) {
   });
 }
 
-let creds = null;
+let creds = sessionStorage.getItem('stats_creds');
 
 function showLogin() {
   document.getElementById('stats-content').innerHTML = `
@@ -164,6 +164,7 @@ function doLogin() {
   const u = document.getElementById('s-user').value;
   const p = document.getElementById('s-pass').value;
   creds = 'Basic ' + btoa(u + ':' + p);
+  sessionStorage.setItem('stats_creds', creds);
   loadStats();
 }
 
@@ -176,6 +177,7 @@ async function loadStats() {
     });
     if (r.status === 401) {
       creds = null;
+      sessionStorage.removeItem('stats_creds');
       showLogin();
       document.getElementById('s-err').style.display = 'block';
       return;
