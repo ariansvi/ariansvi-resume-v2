@@ -124,17 +124,6 @@ The bootstrap is fully IaC — even the GCP project itself is created by Terrafo
 └── docker-compose.yaml  # Local development
 ```
 
-## Cost
-
-Running on GKE Autopilot free tier: **~$10-13/month**.
-
-| Resource | Cost |
-|----------|------|
-| GKE management fee | $0 (free tier) |
-| Autopilot pods | ~$8-12/mo |
-| Cloud DNS | $0.20/mo |
-| Artifact Registry | ~$0.05/mo |
-
 ## Make Targets
 
 ```bash
