@@ -6,7 +6,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
-from sqlalchemy import func, cast, Date
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from user_agents import parse as parse_ua
 
@@ -204,14 +204,15 @@ def get_dashboard(
     )
 
     # Visits per day (last 30 days)
+    day_expr = func.date(PageVisit.created_at)
     daily = (
         db.query(
-            cast(PageVisit.created_at, Date).label("day"),
+            day_expr.label("day"),
             func.count(PageVisit.id).label("c"),
         )
         .filter(PageVisit.created_at >= month_start)
-        .group_by(cast(PageVisit.created_at, Date))
-        .order_by(cast(PageVisit.created_at, Date))
+        .group_by(day_expr)
+        .order_by(day_expr)
         .all()
     )
 
