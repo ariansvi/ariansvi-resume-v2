@@ -49,6 +49,16 @@ spec:
                 configMapKeyRef:
                   name: backend-config
                   key: LOG_LEVEL
+            - name: STATS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-stats-auth
+                  key: STATS_USERNAME
+            - name: STATS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-stats-auth
+                  key: STATS_PASSWORD
           livenessProbe:
             httpGet:
               path: /api/health
@@ -118,8 +128,6 @@ data:
   ENVIRONMENT: "production"
   CORS_ORIGINS: "https://ariansvi.com,https://www.ariansvi.com"
   LOG_LEVEL: "INFO"
-  STATS_USERNAME: "arian"
-  STATS_PASSWORD: "devops2024"
 
 ---
 apiVersion: v1
