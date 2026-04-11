@@ -139,32 +139,46 @@ function makeChart(id, type, labels, data, label) {
   });
 }
 
-let authHeader = null;
+let creds = null;
 
-function promptAuth() {
-  const user = prompt('Username:');
-  if (!user) return false;
-  const pass = prompt('Password:');
-  if (!pass) return false;
-  authHeader = 'Basic ' + btoa(user + ':' + pass);
-  return true;
+function showLogin() {
+  document.getElementById('stats-content').innerHTML = `
+    <div style="max-width:300px;margin:40px auto;text-align:center">
+      <h2 style="color:var(--accent)">Stats Login</h2>
+      <input id="s-user" type="text" placeholder="Username"
+        style="width:100%;padding:10px;margin:8px 0;background:#222;color:#fff;border:1px solid #555;border-radius:4px">
+      <input id="s-pass" type="password" placeholder="Password"
+        style="width:100%;padding:10px;margin:8px 0;background:#222;color:#fff;border:1px solid #555;border-radius:4px">
+      <button onclick="doLogin()"
+        style="width:100%;padding:10px;margin:8px 0;background:var(--accent);color:#000;border:none;border-radius:4px;cursor:pointer;font-weight:bold">
+        Login</button>
+      <p id="s-err" style="color:#e05a47;display:none">Invalid credentials</p>
+    </div>`;
+  document.getElementById('s-user').focus();
+  document.getElementById('s-pass').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+}
+
+function doLogin() {
+  const u = document.getElementById('s-user').value;
+  const p = document.getElementById('s-pass').value;
+  creds = 'Basic ' + btoa(u + ':' + p);
+  loadStats();
 }
 
 async function loadStats() {
-  if (!authHeader && !promptAuth()) {
-    document.getElementById('stats-content').innerHTML =
-      '<p style="color:#999;text-align:center;padding:40px">Authentication required to view stats.</p>';
-    return;
-  }
+  if (!creds) { showLogin(); return; }
 
   try {
     const r = await fetch('/api/analytics/dashboard', {
-      headers: { 'Authorization': authHeader }
+      headers: { 'Authorization': creds }
     });
     if (r.status === 401) {
-      authHeader = null;
-      promptAuth();
-      return loadStats();
+      creds = null;
+      showLogin();
+      document.getElementById('s-err').style.display = 'block';
+      return;
     }
     const d = await r.json();
 
