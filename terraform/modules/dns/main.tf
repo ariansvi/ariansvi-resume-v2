@@ -14,42 +14,44 @@ resource "google_dns_managed_zone" "main" {
   }
 }
 
-# Cloud Run domain mapping asks for specific records (type + rrdata).
-# We create whatever it asks for the apex and www names.
+# Cloud Run domain mapping uses Google's static anycast endpoints.
+# For apex (root) domains Cloud Run accepts only A/AAAA records.
+# For sub-domains (www) it uses a CNAME to ghs.googlehosted.com.
+# Source: https://cloud.google.com/run/docs/mapping-custom-domains
 
-locals {
-  # Group records by (fqdn, type) because Cloud DNS needs one record_set
-  # per (name, type) pair with all rrdatas collected.
-  apex_grouped = {
-    for t in distinct([for r in var.apex_cname_data : r.type]) : t => [
-      for r in var.apex_cname_data : r.rrdata if r.type == t
-    ]
-  }
-  www_grouped = {
-    for t in distinct([for r in var.www_cname_data : r.type]) : t => [
-      for r in var.www_cname_data : r.rrdata if r.type == t
-    ]
-  }
-}
-
-resource "google_dns_record_set" "apex" {
-  for_each = local.apex_grouped
-
+resource "google_dns_record_set" "apex_a" {
   name         = "${var.domain}."
   managed_zone = google_dns_managed_zone.main.name
   project      = var.project_id
-  type         = each.key
+  type         = "A"
   ttl          = 300
-  rrdatas      = each.value
+  rrdatas = [
+    "216.239.32.21",
+    "216.239.34.21",
+    "216.239.36.21",
+    "216.239.38.21",
+  ]
+}
+
+resource "google_dns_record_set" "apex_aaaa" {
+  name         = "${var.domain}."
+  managed_zone = google_dns_managed_zone.main.name
+  project      = var.project_id
+  type         = "AAAA"
+  ttl          = 300
+  rrdatas = [
+    "2001:4860:4802:32::15",
+    "2001:4860:4802:34::15",
+    "2001:4860:4802:36::15",
+    "2001:4860:4802:38::15",
+  ]
 }
 
 resource "google_dns_record_set" "www" {
-  for_each = local.www_grouped
-
   name         = "www.${var.domain}."
   managed_zone = google_dns_managed_zone.main.name
   project      = var.project_id
-  type         = each.key
+  type         = "CNAME"
   ttl          = 300
-  rrdatas      = each.value
+  rrdatas      = ["ghs.googlehosted.com."]
 }

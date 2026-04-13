@@ -59,11 +59,9 @@ module "cloudrun" {
 module "dns" {
   source = "./modules/dns"
 
-  project_id      = var.project_id
-  domain          = var.domain
-  environment     = var.environment
-  apex_cname_data = module.cloudrun.apex_dns_records
-  www_cname_data  = module.cloudrun.www_dns_records
+  project_id  = var.project_id
+  domain      = var.domain
+  environment = var.environment
 }
 
 # ─── GCS (used for Terraform state and any future backups) ──────────
