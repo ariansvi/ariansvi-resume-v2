@@ -20,8 +20,29 @@ permissions:
   id-token: write
 
 jobs:
+  # Block deploys on failing CI. Inlined here (rather than via
+  # workflow_run on the CI workflow) so we can gate the same commit's
+  # tests directly without extra workflow plumbing.
+  test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r app/backend/requirements.txt
+      - name: Flake8
+        run: cd app/backend && flake8 app/ tests/ --max-line-length=88
+      - name: Mypy
+        run: cd app/backend && mypy app/ --ignore-missing-imports
+      - name: Pytest
+        run: cd app/backend && pytest tests/ -v --tb=short
+
   build-and-deploy:
     name: Build & Deploy to Cloud Run
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

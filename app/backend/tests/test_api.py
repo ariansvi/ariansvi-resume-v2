@@ -13,18 +13,19 @@ client = TestClient(app)
 
 class TestHealth:
     def test_health(self):
+        # /api/health is intentionally minimal — used by Cloud Run probes,
+        # exposed without the internal-token gate. Must not leak version
+        # or environment.
         r = client.get("/api/health")
         assert r.status_code == 200
-        assert r.json()["status"] == "healthy"
+        assert r.json() == {"status": "ok"}
 
     def test_ready(self):
         r = client.get("/api/ready")
         assert r.status_code == 200
         assert r.json()["status"] == "ready"
 
-    def test_info(self):
+    def test_info_removed(self):
+        # /api/info was removed because it leaked Python and OS versions.
         r = client.get("/api/info")
-        assert r.status_code == 200
-        data = r.json()
-        assert "uptime_seconds" in data
-        assert "python_version" in data
+        assert r.status_code == 404
