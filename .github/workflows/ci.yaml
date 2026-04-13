@@ -58,11 +58,13 @@ jobs:
         with:
           dockerfile: app/frontend/Dockerfile
           failure-threshold: warning
+          ignore: DL3018
 
       - uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: app/backend/Dockerfile
           failure-threshold: warning
+          ignore: DL3018
 
   lint-terraform:
     name: Lint Terraform

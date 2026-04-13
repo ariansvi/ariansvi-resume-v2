@@ -168,8 +168,8 @@ def get_dashboard(
     for snap in recent_30d:
         data = snap.to_dict() or {}
         ts = data.get("created_at")
-        if hasattr(ts, "to_datetime"):
-            ts = ts.to_datetime()
+        if ts is not None and hasattr(ts, "to_datetime"):
+            ts = ts.to_datetime()  # type: ignore[union-attr]
         data["created_at"] = ts
         visits.append(data)
 

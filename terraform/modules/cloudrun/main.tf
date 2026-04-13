@@ -100,6 +100,9 @@ resource "google_cloud_run_v2_service" "frontend" {
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
+    # Reuse the backend SA so CI only needs actAs on one service account.
+    service_account = var.backend_service_account_email
+
     scaling {
       min_instance_count = 0
       max_instance_count = 3
