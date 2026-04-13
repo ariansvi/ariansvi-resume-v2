@@ -1,16 +1,23 @@
+<!-- Favicons -->
+<link rel="icon" type="image/svg+xml" href="{{ "favicon.svg" | absURL }}" />
+<link rel="icon" type="image/png" sizes="512x512" href="{{ "favicon.png" | absURL }}" />
+<link rel="shortcut icon" href="{{ "favicon.ico" | absURL }}" />
+<link rel="apple-touch-icon" sizes="180x180" href="{{ "apple-touch-icon.png" | absURL }}" />
+<meta name="theme-color" content="#eec35e" />
+
 <!-- Open Graph -->
 <meta property="og:title" content="{{ .Title | default .Site.Title }}" />
 <meta property="og:description" content="{{ .Description | default .Site.Params.description }}" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{{ .Permalink }}" />
-<meta property="og:image" content="{{ "images/arian.jpg" | absURL }}" />
+<meta property="og:image" content="{{ "images/arian.png" | absURL }}" />
 <meta property="og:site_name" content="{{ .Site.Title }}" />
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="{{ .Title | default .Site.Title }}" />
 <meta name="twitter:description" content="{{ .Description | default .Site.Params.description }}" />
-<meta name="twitter:image" content="{{ "images/arian.jpg" | absURL }}" />
+<meta name="twitter:image" content="{{ "images/arian.png" | absURL }}" />
 
 <style>
   /* Sticky header — hides on scroll down, shows on scroll up */
