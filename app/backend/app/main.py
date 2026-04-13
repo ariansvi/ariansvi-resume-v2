@@ -39,7 +39,8 @@ app.add_middleware(
     rules={
         "/api/analytics/visit": (60, 60),       # 60 visits/min/IP
         "/api/contact/": (5, 600),              # 5 messages/10 min/IP
-        "/api/analytics/dashboard": (30, 60),   # 30/min/IP — also gated by Basic auth lockout
+        # 30/min/IP — also gated by Basic auth lockout
+        "/api/analytics/dashboard": (30, 60),
     },
 )
 
