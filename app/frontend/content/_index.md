@@ -2,7 +2,7 @@
 title: "Home"
 ---
 
-![Arian Svirsky](/images/arian.jpg)
+![Arian Svirsky](/images/arian.png)
 
 # Arian Svirsky
 

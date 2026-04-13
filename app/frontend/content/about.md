@@ -2,7 +2,7 @@
 title: "About"
 ---
 
-![Arian Svirsky](/images/arian.jpg)
+![Arian Svirsky](/images/arian.png)
 
 Staff-level DevOps / Infrastructure Engineer with 10+ years of hands-on experience. Specialized in Kubernetes, multi-cloud platforms, and production systems at scale. I've led infrastructure design at two very different companies — a unicorn identity startup and an enterprise security product — and taken both from "it works" to "it scales, it's observable, and it doesn't wake anyone up."
 
