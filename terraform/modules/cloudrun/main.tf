@@ -1,3 +1,11 @@
+# Shared secret between nginx (frontend) and FastAPI (backend).
+# Lets us reject requests that hit the backend's *.run.app URL directly,
+# bypassing nginx, CSP, security headers, and future rate limits.
+resource "random_password" "internal_token" {
+  length  = 48
+  special = false
+}
+
 # ─── Backend Cloud Run service ──────────────────────────────────────
 
 resource "google_cloud_run_v2_service" "backend" {
@@ -44,6 +52,10 @@ resource "google_cloud_run_v2_service" "backend" {
       env {
         name  = "STATS_PASSWORD"
         value = var.stats_password
+      }
+      env {
+        name  = "INTERNAL_TOKEN"
+        value = random_password.internal_token.result
       }
 
       resources {
@@ -118,6 +130,10 @@ resource "google_cloud_run_v2_service" "frontend" {
       env {
         name  = "BACKEND_URL"
         value = google_cloud_run_v2_service.backend.uri
+      }
+      env {
+        name  = "INTERNAL_TOKEN"
+        value = random_password.internal_token.result
       }
 
       resources {

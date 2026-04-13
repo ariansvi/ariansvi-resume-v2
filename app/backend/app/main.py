@@ -7,6 +7,7 @@ from prometheus_client import make_asgi_app
 from app.config import settings
 from app.middleware import MetricsMiddleware
 from app.routers import analytics, contact, health
+from app.security import InternalTokenMiddleware, RateLimitMiddleware
 
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
@@ -31,9 +32,26 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+# Per-IP rate limit on the write endpoints + the auth endpoint.
+# Order: this runs AFTER InternalTokenMiddleware (Starlette adds in reverse).
+app.add_middleware(
+    RateLimitMiddleware,
+    rules={
+        "/api/analytics/visit": (60, 60),       # 60 visits/min/IP
+        "/api/contact/": (5, 600),              # 5 messages/10 min/IP
+        "/api/analytics/dashboard": (30, 60),   # 30/min/IP — also gated by Basic auth lockout
+    },
+)
+
+# Internal-token gate: rejects anyone hitting the backend *.run.app URL
+# directly. Only nginx (which adds X-Internal-Token) and Cloud Run probes
+# (which hit /api/health) get through.
+app.add_middleware(InternalTokenMiddleware)
+
 app.add_middleware(MetricsMiddleware)
 
-# Prometheus metrics endpoint
+# Prometheus metrics endpoint (also protected by InternalTokenMiddleware
+# above — anyone hitting /metrics needs the token).
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 

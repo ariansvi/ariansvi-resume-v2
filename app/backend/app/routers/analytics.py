@@ -1,5 +1,6 @@
 import logging
 import secrets
+import time
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 
@@ -7,7 +8,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from google.cloud import firestore
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from user_agents import parse as parse_ua
 
 from app.config import settings
@@ -19,10 +20,66 @@ security = HTTPBasic()
 
 COLLECTION = "page_visits"
 
+# Brute-force protection for /dashboard. Per-IP failed-attempt counters,
+# in-memory only (resets on cold start — fine for a personal site that
+# scales to zero anyway).
+_AUTH_FAIL_WINDOW_SEC = 600  # 10 min
+_AUTH_FAIL_MAX = 5
+_AUTH_FAIL_LOCKOUT_SEC = 900  # 15 min after threshold
+_auth_fails: dict[str, list[float]] = {}
+_auth_locked: dict[str, float] = {}
+
+
+def _client_ip(request: Request) -> str:
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def _check_lockout(ip: str) -> None:
+    now = time.time()
+    locked_until = _auth_locked.get(ip, 0.0)
+    if locked_until > now:
+        retry_after = int(locked_until - now)
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many failed attempts. Try again later.",
+            headers={"Retry-After": str(retry_after)},
+        )
+
+
+def _record_failure(ip: str) -> None:
+    now = time.time()
+    fails = [t for t in _auth_fails.get(ip, []) if now - t < _AUTH_FAIL_WINDOW_SEC]
+    fails.append(now)
+    _auth_fails[ip] = fails
+    if len(fails) >= _AUTH_FAIL_MAX:
+        _auth_locked[ip] = now + _AUTH_FAIL_LOCKOUT_SEC
+        logger.warning("Auth lockout for IP %s after %d failures", ip, len(fails))
+
+
+def _record_success(ip: str) -> None:
+    _auth_fails.pop(ip, None)
+    _auth_locked.pop(ip, None)
+
 
 def verify_credentials(
+    request: Request,
     credentials: HTTPBasicCredentials = Depends(security),
 ):
+    ip = _client_ip(request)
+    _check_lockout(ip)
+
+    # Cap header length before any comparison work (cheap DoS guard).
+    if len(credentials.username) > 64 or len(credentials.password) > 256:
+        _record_failure(ip)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
     correct_user = secrets.compare_digest(
         credentials.username, settings.STATS_USERNAME
     )
@@ -30,31 +87,18 @@ def verify_credentials(
         credentials.password, settings.STATS_PASSWORD
     )
     if not (correct_user and correct_pass):
+        _record_failure(ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Basic"},
         )
+    _record_success(ip)
     return credentials.username
 
 
 # In-memory GeoIP cache to avoid hitting the API too often
 _geo_cache: dict[str, dict] = {}
-
-
-def _mask_ip(ip: str | None) -> str:
-    """Mask last octet (IPv4) or last hextet (IPv6) for privacy."""
-    if not ip:
-        return "-"
-    if "." in ip:
-        parts = ip.split(".")
-        if len(parts) == 4:
-            return ".".join(parts[:3] + ["x"])
-    if ":" in ip:
-        parts = ip.split(":")
-        if len(parts) > 1:
-            return ":".join(parts[:-1] + ["x"])
-    return ip
 
 
 async def _geoip_lookup(ip: str) -> dict:
@@ -79,8 +123,9 @@ async def _geoip_lookup(ip: str) -> dict:
 
 
 class VisitCreate(BaseModel):
-    path: str
-    referrer: str | None = None
+    # Hard length caps so an attacker can't blow up Firestore docs.
+    path: str = Field(min_length=1, max_length=512)
+    referrer: str | None = Field(default=None, max_length=2048)
 
 
 @router.post("/visit", status_code=201)
@@ -94,7 +139,9 @@ async def record_visit(
 
     geo = await _geoip_lookup(ip or "")
 
-    ua_str = request.headers.get("user-agent", "")
+    # Truncate UA before storing — Firestore doc size limit is 1MiB and we
+    # don't want a single visit eating it.
+    ua_str = request.headers.get("user-agent", "")[:512]
     ua = parse_ua(ua_str)
     if ua.is_mobile:
         device = "mobile"
@@ -214,7 +261,7 @@ def get_dashboard(
             "browser": v.get("browser"),
             "os": v.get("os"),
             "device": v.get("device_type"),
-            "ip": _mask_ip(v.get("ip_address")),
+            "ip": v.get("ip_address") or "-",
             "time": v["created_at"].isoformat() if v.get("created_at") else None,
         }
         for v in visits[:20]

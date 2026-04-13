@@ -1,22 +1,16 @@
-import platform
-from datetime import datetime
-
 from fastapi import APIRouter
 
 from app.config import settings
 
 router = APIRouter(tags=["health"])
 
-START_TIME = datetime.utcnow()
-
 
 @router.get("/health")
 def health_check():
-    return {
-        "status": "healthy",
-        "version": settings.APP_VERSION,
-        "environment": settings.ENVIRONMENT,
-    }
+    # Intentionally minimal — this endpoint is unauthenticated and called
+    # from outside our token-gate (Cloud Run probes). Don't leak version,
+    # environment, or anything else useful for recon.
+    return {"status": "ok"}
 
 
 @router.get("/ready")
@@ -24,14 +18,6 @@ def readiness_check():
     return {"status": "ready"}
 
 
-@router.get("/info")
-def app_info():
-    uptime = (datetime.utcnow() - START_TIME).total_seconds()
-    return {
-        "app": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "environment": settings.ENVIRONMENT,
-        "uptime_seconds": round(uptime, 1),
-        "python_version": platform.python_version(),
-        "platform": platform.platform(),
-    }
+# /info was removed in favor of zero-leak health checks.
+# Version/env are still available internally via metrics + logs.
+_ = settings  # silence unused import

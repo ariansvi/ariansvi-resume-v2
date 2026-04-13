@@ -86,6 +86,19 @@ const COLORS = [
   '#6366f1','#3b82f6','#06b6d4','#10b981','#84cc16'
 ];
 
+// HTML-escape any value before injecting into innerHTML. The visit fields
+// (path, browser, os, city, country, referrer) are attacker-controlled —
+// without escaping they're a stored-XSS sink in the stats dashboard.
+function esc(v) {
+  if (v === null || v === undefined) return '';
+  return String(v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function countryFlag(country) {
   const flags = {
     'Israel':'🇮🇱','United States':'🇺🇸','Germany':'🇩🇪','France':'🇫🇷',
@@ -224,13 +237,13 @@ async function loadStats() {
           <tr><th>When</th><th>IP</th><th>Location</th><th>Page</th><th>Browser</th><th>OS</th><th>Device</th></tr>
           ${d.recent.map(v => `
             <tr>
-              <td>${v.time ? timeAgo(v.time) : '-'}</td>
-              <td>${v.ip || '-'}</td>
-              <td><span class="flag">${countryFlag(v.country)}</span>${v.city ? v.city+', ' : ''}${v.country || 'Unknown'}</td>
-              <td>${v.path}</td>
-              <td>${v.browser || '-'}</td>
-              <td>${v.os || '-'}</td>
-              <td>${v.device || '-'}</td>
+              <td>${esc(v.time ? timeAgo(v.time) : '-')}</td>
+              <td>${esc(v.ip || '-')}</td>
+              <td><span class="flag">${countryFlag(v.country)}</span>${esc(v.city ? v.city+', ' : '')}${esc(v.country || 'Unknown')}</td>
+              <td>${esc(v.path)}</td>
+              <td>${esc(v.browser || '-')}</td>
+              <td>${esc(v.os || '-')}</td>
+              <td>${esc(v.device || '-')}</td>
             </tr>
           `).join('')}
         </table>
@@ -247,24 +260,29 @@ async function loadStats() {
       d.daily.map(x => x.date.slice(5)),
       d.daily.map(x => x.count), 'Visits');
 
+    // Chart.js renders labels on a canvas (not as HTML), so XSS isn't a
+    // direct concern, but we still cap label length to keep tooltips
+    // legible if someone POSTs a 10kB path.
+    const cap = s => (s || '').slice(0, 80);
+
     makeChart('chart-countries', 'doughnut',
-      d.by_country.map(x => countryFlag(x.country)+' '+x.country),
+      d.by_country.map(x => countryFlag(x.country)+' '+cap(x.country)),
       d.by_country.map(x => x.count));
 
     makeChart('chart-browsers', 'doughnut',
-      d.by_browser.map(x => x.browser),
+      d.by_browser.map(x => cap(x.browser)),
       d.by_browser.map(x => x.count));
 
     makeChart('chart-os', 'doughnut',
-      d.by_os.map(x => x.os),
+      d.by_os.map(x => cap(x.os)),
       d.by_os.map(x => x.count));
 
     makeChart('chart-devices', 'pie',
-      d.by_device.map(x => x.device),
+      d.by_device.map(x => cap(x.device)),
       d.by_device.map(x => x.count));
 
     makeChart('chart-pages', 'bar',
-      d.top_pages.map(x => x.path),
+      d.top_pages.map(x => cap(x.path)),
       d.top_pages.map(x => x.count), 'Views');
 
   } catch(e) {
