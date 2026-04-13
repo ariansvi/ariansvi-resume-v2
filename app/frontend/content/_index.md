@@ -6,15 +6,19 @@ title: "Home"
 
 # Arian Svirsky
 
-DevOps Engineer. I build and run cloud-native infrastructure.
+Staff DevOps / Infrastructure Engineer — I design, own, and scale cloud-native platforms.
+
+**Core stack:** Kubernetes · AWS · GCP · Terraform · Pulumi · ArgoCD · Datadog · CI/CD · Observability · Networking
 
 ---
 
-Right now I'm building multi-cloud Kubernetes platforms at [Descope](https://www.descope.com) — 25+ microservices across AWS and GCP, deployed to 4 regions, serving millions of authentication requests.
+10+ years building and running production infrastructure. Specialized in Kubernetes, multi-cloud environments, and high-scale systems serving tens of millions of requests.
 
-Before that, I spent 6 years at [Palo Alto Networks](https://www.paloaltonetworks.com) where I migrated the Cortex XSOAR platform from EC2 to Kubernetes and figured out how to run Docker-in-Docker securely inside a security product.
+Currently at [Descope](https://www.descope.com), building and operating a multi-cloud Kubernetes platform — 25+ microservices across AWS and GCP, deployed to 4 regions, serving millions of authentication requests daily. I own infrastructure reliability, define deployment standards, and contribute to architectural decisions.
 
-I've been doing this since 2014. I like solving infrastructure problems that don't have easy answers.
+Before that, I spent 6 years at [Palo Alto Networks](https://www.paloaltonetworks.com) (Cortex XSOAR, formerly Demisto), where I led the migration of a security product from EC2 to Kubernetes and solved the non-trivial problem of running Docker-in-Docker securely inside a security product. Left as Principal DevOps Engineer.
+
+I've been doing this since 2014. I like solving infrastructure problems that don't have easy answers — the kind where you own the decision, the design, and the 3am page if it breaks.
 
 ---
 

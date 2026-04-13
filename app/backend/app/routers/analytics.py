@@ -41,6 +41,21 @@ def verify_credentials(
 _geo_cache: dict[str, dict] = {}
 
 
+def _mask_ip(ip: str | None) -> str:
+    """Mask last octet (IPv4) or last hextet group (IPv6) for privacy."""
+    if not ip:
+        return "-"
+    if "." in ip:  # IPv4
+        parts = ip.split(".")
+        if len(parts) == 4:
+            return ".".join(parts[:3] + ["x"])
+    if ":" in ip:  # IPv6
+        parts = ip.split(":")
+        if len(parts) > 1:
+            return ":".join(parts[:-1] + ["x"])
+    return ip
+
+
 async def _geoip_lookup(ip: str) -> dict:
     """Lookup country/city from IP using free API."""
     if not ip or ip in ("127.0.0.1", "::1", "localhost"):
@@ -51,7 +66,7 @@ async def _geoip_lookup(ip: str) -> dict:
 
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
-            r = await client.get(f"http://ip-api.com/json/{ip}?fields=country,city")
+            r = await client.get(f"https://ipapi.co/{ip}/json/")
             if r.status_code == 200:
                 data = r.json()
                 result = {
@@ -251,7 +266,7 @@ def get_dashboard(
                 "browser": v.browser,
                 "os": v.os,
                 "device": v.device_type,
-                "ip": v.ip_address or "-",
+                "ip": _mask_ip(v.ip_address),
                 "time": v.created_at.isoformat() if v.created_at else None,
             }
             for v in recent

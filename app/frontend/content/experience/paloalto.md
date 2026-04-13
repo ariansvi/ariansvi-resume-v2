@@ -6,26 +6,26 @@ tags: ["kubernetes", "docker", "security", "migration"]
 
 **Palo Alto Networks** (Cortex XSOAR, formerly Demisto) — 6 years
 
-Joined Demisto as a DevOps Engineer, stayed through the Palo Alto Networks acquisition, left as Principal DevOps Engineer.
+Joined Demisto as a DevOps Engineer, stayed through the Palo Alto Networks acquisition, left as **Principal DevOps Engineer**. Led infrastructure architecture and mentored a growing DevOps team through a startup-to-enterprise transition.
 
 ### The hard problem: Docker-in-Docker on Kubernetes
 
-Cortex XSOAR is a SOAR product — it runs customer automation playbooks inside Docker containers. When we moved from EC2 to Kubernetes, the big question was: how do you securely run Docker-in-Docker inside Kubernetes pods?
+Cortex XSOAR is a SOAR product — it runs customer automation playbooks inside Docker containers. When we moved from EC2 to Kubernetes, I led the design of how to securely run Docker-in-Docker inside Kubernetes pods.
 
 This isn't a "just add privileged mode" situation. This is a security product. Customers run untrusted integration code. Container escapes aren't theoretical — they're the threat model.
 
-We solved it with a combination of:
-- Custom container runtime configuration
-- Network policies for strict workload isolation
-- Resource limits that actually work under dynamic scheduling
-- A security review process that would make most companies cry
+I drove the solution end-to-end:
+- Designed a custom container runtime configuration to eliminate the privileged requirement
+- Authored network policies for strict workload isolation
+- Set resource limits that hold under dynamic scheduling
+- Owned the security review process and got sign-off from the PANW security org
 
-It took months, broke things, and taught me more about container security than any certification ever could.
+The migration shipped and became the standard deployment for enterprise customers.
 
-### The rest of the 6 years
+### Ownership across 6 years
 
-- Built the CI/CD pipeline from Jenkins to GitLab CI
-- Terraform'd all of AWS (VPC, EKS, RDS, S3, the works)
-- Evolved monitoring from Nagios to Prometheus + Grafana
-- Integrated Demisto's infrastructure into the Palo Alto Networks ecosystem post-acquisition
-- Eventually became Principal — meaning I got to make architecture decisions and mentor the team
+- **CI/CD architecture** — Led the migration from Jenkins to GitLab CI; defined shared-library patterns used across the R&D org
+- **AWS infrastructure** — Terraformed all of AWS (VPC, EKS, RDS, S3, IAM, Route53); owned cost, security posture, and DR strategy
+- **Observability transformation** — Drove migration from Nagios to Prometheus + Grafana; defined the SLO and alerting standard
+- **Post-acquisition integration** — Led integration of Demisto infrastructure into the Palo Alto Networks ecosystem (IAM, networking, compliance)
+- **Principal responsibilities** — Made architecture decisions, mentored engineers, and represented infrastructure in cross-org technical reviews

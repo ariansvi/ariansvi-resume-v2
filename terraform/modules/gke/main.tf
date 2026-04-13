@@ -1,9 +1,11 @@
 resource "google_container_cluster" "main" {
   provider = google-beta
 
-  name     = var.cluster_name
-  project  = var.project_id
-  location = var.region
+  name    = var.cluster_name
+  project = var.project_id
+  # Zonal cluster (single control plane) — ~$72/mo cheaper than regional.
+  # Fine for a personal site; for production HA flip back to var.region.
+  location = "${var.region}-a"
 
   # Autopilot mode — GKE manages nodes, you pay per pod
   enable_autopilot = true
