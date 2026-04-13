@@ -14,10 +14,12 @@ server {
         add_header Content-Type text/plain;
     }
 
-    # Proxy API requests to the backend Cloud Run service
+    # Proxy API requests to the backend Cloud Run service.
+    # envsubst renders ${BACKEND_URL} as a literal URL at container start,
+    # so proxy_pass does NOT use an nginx variable (which would disable
+    # automatic URI appending).
     location /api/ {
-        set $backend ${BACKEND_URL};
-        proxy_pass $backend/api/;
+        proxy_pass ${BACKEND_URL};
         proxy_http_version 1.1;
         proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;

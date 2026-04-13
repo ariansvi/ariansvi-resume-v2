@@ -20,10 +20,16 @@ RUN apk add --no-cache gettext
 
 COPY --from=builder /src/public /usr/share/nginx/html
 COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+# Put our entrypoint under a unique name — the nginx base image sets
+# ENTRYPOINT=/docker-entrypoint.sh by default, which would otherwise
+# clobber our wrapper script.
+COPY docker-entrypoint.sh /cloudrun-entrypoint.sh
+RUN sed -i 's/\r$//' /cloudrun-entrypoint.sh && chmod +x /cloudrun-entrypoint.sh
 
 ENV PORT=8080
 EXPOSE 8080
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+# Reset ENTRYPOINT so the nginx base image's default doesn't fire first,
+# then invoke our script via sh to bypass any shebang/format quirks.
+ENTRYPOINT []
+CMD ["sh", "/cloudrun-entrypoint.sh"]

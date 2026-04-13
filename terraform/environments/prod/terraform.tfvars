@@ -1,6 +1,0 @@
-project_id   = "arian-svirsky-resume"
-region       = "us-central1"
-environment  = "prod"
-domain       = "ariansvi.com"
-cluster_name = "resume-cluster"
-ingress_ip   = "34.10.41.95"

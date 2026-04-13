@@ -55,6 +55,21 @@ resource "google_project_iam_member" "ci_cd_run_admin" {
   member  = "serviceAccount:${google_service_account.ci_cd.email}"
 }
 
+# CI/CD needs to read/write Terraform state in GCS
+resource "google_storage_bucket_iam_member" "ci_cd_tfstate" {
+  bucket = "${var.project_id}-tfstate"
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.ci_cd.email}"
+}
+
+# CI/CD also needs to run terraform plan/apply across the whole project
+# (it's our infra admin). Broad but acceptable for a personal project.
+resource "google_project_iam_member" "ci_cd_editor" {
+  project = var.project_id
+  role    = "roles/editor"
+  member  = "serviceAccount:${google_service_account.ci_cd.email}"
+}
+
 # CI/CD must be able to "act as" the backend service account to deploy it
 resource "google_service_account_iam_member" "ci_cd_act_as_backend" {
   service_account_id = google_service_account.backend.name

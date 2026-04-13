@@ -28,10 +28,10 @@ dev-backend: ## Start only FastAPI dev server
 build: build-frontend build-backend ## Build all Docker images
 
 build-frontend:
-	docker build -t $(FRONTEND_IMAGE):$(TAG) -t $(FRONTEND_IMAGE):latest app/frontend/
+	docker buildx build --platform=linux/amd64 --load -t $(FRONTEND_IMAGE):$(TAG) -t $(FRONTEND_IMAGE):latest app/frontend/
 
 build-backend:
-	docker build -t $(BACKEND_IMAGE):$(TAG) -t $(BACKEND_IMAGE):latest app/backend/
+	docker buildx build --platform=linux/amd64 --load -t $(BACKEND_IMAGE):$(TAG) -t $(BACKEND_IMAGE):latest app/backend/
 
 push: push-frontend push-backend ## Push all images
 
