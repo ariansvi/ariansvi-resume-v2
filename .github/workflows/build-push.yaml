@@ -13,6 +13,7 @@ env:
   REGISTRY: us-central1-docker.pkg.dev/arian-svirsky-resume/resume
   FRONTEND_SERVICE: resume-frontend
   BACKEND_SERVICE: resume-backend
+  RUNTIME_SA: resume-backend@arian-svirsky-resume.iam.gserviceaccount.com
 
 permissions:
   contents: read
@@ -65,6 +66,7 @@ jobs:
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
             --image ${{ env.REGISTRY }}/backend:${TAG} \
             --region ${{ env.REGION }} \
+            --service-account ${{ env.RUNTIME_SA }} \
             --quiet
 
       - name: Deploy frontend to Cloud Run
@@ -73,4 +75,5 @@ jobs:
           gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
             --image ${{ env.REGISTRY }}/frontend:${TAG} \
             --region ${{ env.REGION }} \
+            --service-account ${{ env.RUNTIME_SA }} \
             --quiet

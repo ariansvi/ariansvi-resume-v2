@@ -48,6 +48,7 @@ jobs:
           gcloud run deploy resume-backend \
             --image ${{ env.REGISTRY }}/backend:${{ github.event.inputs.image_tag }} \
             --region ${{ env.REGION }} \
+            --service-account resume-backend@arian-svirsky-resume.iam.gserviceaccount.com \
             --quiet
 
       - name: Deploy frontend
@@ -56,4 +57,5 @@ jobs:
           gcloud run deploy resume-frontend \
             --image ${{ env.REGISTRY }}/frontend:${{ github.event.inputs.image_tag }} \
             --region ${{ env.REGION }} \
+            --service-account resume-backend@arian-svirsky-resume.iam.gserviceaccount.com \
             --quiet
