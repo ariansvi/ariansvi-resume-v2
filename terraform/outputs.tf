@@ -1,12 +1,21 @@
-output "cluster_name" {
-  description = "GKE cluster name"
-  value       = module.gke.cluster_name
+output "frontend_url" {
+  description = "Cloud Run URL for the frontend (use this to test before DNS is live)"
+  value       = module.cloudrun.frontend_url
 }
 
-output "cluster_endpoint" {
-  description = "GKE cluster endpoint"
-  value       = module.gke.cluster_endpoint
-  sensitive   = true
+output "backend_url" {
+  description = "Cloud Run URL for the backend API"
+  value       = module.cloudrun.backend_url
+}
+
+output "apex_dns_records" {
+  description = "DNS records required for the apex domain mapping"
+  value       = module.cloudrun.apex_dns_records
+}
+
+output "www_dns_records" {
+  description = "DNS records required for the www domain mapping"
+  value       = module.cloudrun.www_dns_records
 }
 
 output "dns_name_servers" {
@@ -17,9 +26,4 @@ output "dns_name_servers" {
 output "registry_url" {
   description = "Artifact Registry URL"
   value       = module.gar.registry_url
-}
-
-output "kubeconfig_command" {
-  description = "Command to configure kubectl"
-  value       = "gcloud container clusters get-credentials ${module.gke.cluster_name} --region ${var.region} --project ${var.project_id}"
 }

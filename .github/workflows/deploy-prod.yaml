@@ -1,48 +1,59 @@
-name: Deploy Production
+name: Deploy / Rollback Production
 
 on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Image tag to deploy (default: latest)"
-        required: false
+        description: "Image tag to deploy (e.g. a1b2c3d or latest)"
+        required: true
         default: "latest"
+      service:
+        description: "Which service to deploy"
+        required: true
+        default: "both"
+        type: choice
+        options:
+          - both
+          - frontend
+          - backend
 
 env:
+  PROJECT_ID: arian-svirsky-resume
+  REGION: us-central1
   REGISTRY: us-central1-docker.pkg.dev/arian-svirsky-resume/resume
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   deploy:
-    name: Deploy to Production
+    name: Deploy to Cloud Run
     runs-on: ubuntu-latest
     environment: production
-    permissions:
-      contents: write
-      id-token: write
     steps:
       - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: resume-ci-cd@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
 
-      - name: Update kustomization with new image tag
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy backend
+        if: ${{ github.event.inputs.service == 'both' || github.event.inputs.service == 'backend' }}
         run: |
-          TAG=${{ github.event.inputs.image_tag }}
-          cd k8s/overlays/production
+          gcloud run deploy resume-backend \
+            --image ${{ env.REGISTRY }}/backend:${{ github.event.inputs.image_tag }} \
+            --region ${{ env.REGION }} \
+            --quiet
 
-          # Update image tags in kustomization.yaml
-          sed -i "s/newTag: .*/newTag: \"${TAG}\"/" kustomization.yaml
-
-      - name: Commit and push
+      - name: Deploy frontend
+        if: ${{ github.event.inputs.service == 'both' || github.event.inputs.service == 'frontend' }}
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          TAG=${{ github.event.inputs.image_tag }}
-          git add k8s/overlays/production/kustomization.yaml
-          git diff --cached --quiet || \
-            git commit -m "deploy: update production to ${TAG}" && \
-            git push
-
-      - name: Notify
-        run: |
-          echo "Production deployment triggered with tag: ${{ github.event.inputs.image_tag }}"
-          echo "ArgoCD will pick up the change and sync automatically."
+          gcloud run deploy resume-frontend \
+            --image ${{ env.REGISTRY }}/frontend:${{ github.event.inputs.image_tag }} \
+            --region ${{ env.REGION }} \
+            --quiet

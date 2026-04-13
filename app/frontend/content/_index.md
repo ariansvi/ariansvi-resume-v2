@@ -22,4 +22,4 @@ I've been doing this since 2014. I like solving infrastructure problems that don
 
 ---
 
-This site is itself a DevOps project — [GKE Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview), [Terraform](https://github.com/ariansvi/ariansvi-resume-v2/tree/main/terraform), [ArgoCD](https://argo-cd.readthedocs.io/), [GitHub Actions](https://github.com/ariansvi/ariansvi-resume-v2/actions), [Prometheus + Grafana](https://prometheus.io/). Source code is [here](https://github.com/ariansvi/ariansvi-resume-v2).
+This site is itself a DevOps project — [Cloud Run](https://cloud.google.com/run) (serverless, scales to zero), [Firestore](https://cloud.google.com/firestore) for analytics, [Terraform](https://github.com/ariansvi/ariansvi-resume-v2/tree/main/terraform) for everything, [GitHub Actions](https://github.com/ariansvi/ariansvi-resume-v2/actions) with Workload Identity Federation (no long-lived keys). A GKE + ArgoCD + Prometheus version lives on the [`archive/gke-stack`](https://github.com/ariansvi/ariansvi-resume-v2/tree/archive/gke-stack) branch. Source is [here](https://github.com/ariansvi/ariansvi-resume-v2).

@@ -1,4 +1,4 @@
-name: Build & Push & Deploy
+name: Build & Deploy
 
 on:
   push:
@@ -11,17 +11,17 @@ env:
   PROJECT_ID: arian-svirsky-resume
   REGION: us-central1
   REGISTRY: us-central1-docker.pkg.dev/arian-svirsky-resume/resume
+  FRONTEND_SERVICE: resume-frontend
+  BACKEND_SERVICE: resume-backend
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 jobs:
-  build-frontend:
-    name: Build Frontend
+  build-and-deploy:
+    name: Build & Deploy to Cloud Run
     runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
 
@@ -39,39 +39,7 @@ jobs:
       - name: Configure Docker for GAR
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      - name: Build and push
-        run: |
-          TAG=${{ steps.tag.outputs.tag }}
-          docker build \
-            -t ${{ env.REGISTRY }}/frontend:${TAG} \
-            -t ${{ env.REGISTRY }}/frontend:latest \
-            app/frontend/
-          docker push ${{ env.REGISTRY }}/frontend:${TAG}
-          docker push ${{ env.REGISTRY }}/frontend:latest
-
-  build-backend:
-    name: Build Backend
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.tag.outputs.tag }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - id: tag
-        run: echo "tag=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
-
-      - id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: resume-ci-cd@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
-
-      - uses: google-github-actions/setup-gcloud@v2
-
-      - name: Configure Docker for GAR
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-
-      - name: Build and push
+      - name: Build & push backend
         run: |
           TAG=${{ steps.tag.outputs.tag }}
           docker build \
@@ -81,28 +49,28 @@ jobs:
           docker push ${{ env.REGISTRY }}/backend:${TAG}
           docker push ${{ env.REGISTRY }}/backend:latest
 
-  deploy:
-    name: Deploy to Production
-    needs: [build-frontend, build-backend]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update image tags in kustomization
+      - name: Build & push frontend
         run: |
-          TAG=${{ needs.build-frontend.outputs.tag }}
-          cd k8s/overlays/production
-          sed -i "s/newTag: .*/newTag: \"${TAG}\"/" kustomization.yaml
+          TAG=${{ steps.tag.outputs.tag }}
+          docker build \
+            -t ${{ env.REGISTRY }}/frontend:${TAG} \
+            -t ${{ env.REGISTRY }}/frontend:latest \
+            app/frontend/
+          docker push ${{ env.REGISTRY }}/frontend:${TAG}
+          docker push ${{ env.REGISTRY }}/frontend:latest
 
-      - name: Commit and push
+      - name: Deploy backend to Cloud Run
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          TAG=${{ needs.build-frontend.outputs.tag }}
-          git add k8s/overlays/production/kustomization.yaml
-          git diff --cached --quiet || (
-            git commit -m "deploy: update production images to ${TAG} [skip ci]" &&
-            git push
-          )
+          TAG=${{ steps.tag.outputs.tag }}
+          gcloud run deploy ${{ env.BACKEND_SERVICE }} \
+            --image ${{ env.REGISTRY }}/backend:${TAG} \
+            --region ${{ env.REGION }} \
+            --quiet
+
+      - name: Deploy frontend to Cloud Run
+        run: |
+          TAG=${{ steps.tag.outputs.tag }}
+          gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
+            --image ${{ env.REGISTRY }}/frontend:${TAG} \
+            --region ${{ env.REGION }} \
+            --quiet

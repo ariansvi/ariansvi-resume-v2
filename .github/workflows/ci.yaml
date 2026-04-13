@@ -83,15 +83,3 @@ jobs:
           terraform init -backend=false
           terraform validate
 
-  lint-kustomize:
-    name: Validate Kustomize
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Validate overlays
-        run: |
-          for overlay in k8s/overlays/*/; do
-            echo "Validating $overlay..."
-            kubectl kustomize "$overlay" > /dev/null
-          done

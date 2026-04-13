@@ -188,7 +188,7 @@ async function loadStats() {
     const el = document.getElementById('stats-content');
     el.innerHTML = `
       <h1>Live Stats</h1>
-      <p style="color:#999;margin-bottom:20px">Real-time visitor analytics — powered by FastAPI + SQLite + Chart.js</p>
+      <p style="color:#999;margin-bottom:20px">Real-time visitor analytics — powered by FastAPI + Firestore + Chart.js</p>
 
       <div class="stats-grid">
         <div class="stat-card"><span class="number">${d.summary.total_visits}</span><span class="label">Total Visits</span></div>
@@ -232,7 +232,7 @@ async function loadStats() {
 
       <p style="color:#666;font-size:0.8em;margin-top:30px;text-align:center">
         No cookies. No tracking scripts. Just server-side analytics.<br>
-        Built with FastAPI + SQLite + Chart.js | Auto-refreshes every 30s
+        Built with FastAPI + Firestore + Chart.js | Auto-refreshes every 30s
       </p>
     `;
 

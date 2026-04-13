@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 
 from app.config import settings
-from app.database import init_db
 from app.middleware import MetricsMiddleware
 from app.routers import analytics, contact, health
 
@@ -46,7 +45,6 @@ app.include_router(contact.router, prefix="/api")
 
 @app.on_event("startup")
 def startup():
-    init_db()
     logging.getLogger(__name__).info(
         "Resume API started | env=%s version=%s",
         settings.ENVIRONMENT,

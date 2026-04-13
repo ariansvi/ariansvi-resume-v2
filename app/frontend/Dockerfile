@@ -15,10 +15,15 @@ FROM nginx:1.27-alpine
 LABEL maintainer="Arian Svirsky <arian@ariansvi.com>"
 LABEL description="Arian Svirsky Resume - Frontend"
 
+# envsubst is part of gettext; needed to template nginx.conf at runtime
+RUN apk add --no-cache gettext
+
 COPY --from=builder /src/public /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-EXPOSE 80
+ENV PORT=8080
+EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget -qO- http://localhost/health || exit 1
+ENTRYPOINT ["/docker-entrypoint.sh"]

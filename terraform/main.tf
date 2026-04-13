@@ -8,42 +8,6 @@ provider "google-beta" {
   region  = var.region
 }
 
-# ─── VPC ─────────────────────────────────────────────────────────────
-
-module "vpc" {
-  source = "./modules/vpc"
-
-  project_id  = var.project_id
-  region      = var.region
-  environment = var.environment
-}
-
-# ─── GKE Autopilot ──────────────────────────────────────────────────
-
-module "gke" {
-  source = "./modules/gke"
-
-  project_id   = var.project_id
-  region       = var.region
-  environment  = var.environment
-  cluster_name = var.cluster_name
-  network      = module.vpc.network_name
-  subnetwork   = module.vpc.subnet_name
-
-  depends_on = [module.vpc]
-}
-
-# ─── Cloud DNS ───────────────────────────────────────────────────────
-
-module "dns" {
-  source = "./modules/dns"
-
-  project_id  = var.project_id
-  domain      = var.domain
-  environment = var.environment
-  ingress_ip  = var.ingress_ip
-}
-
 # ─── Artifact Registry ──────────────────────────────────────────────
 
 module "gar" {
@@ -54,21 +18,60 @@ module "gar" {
   environment = var.environment
 }
 
-# ─── GCS (Terraform state bucket bootstrapped separately) ────────────
+# ─── Firestore (analytics storage) ──────────────────────────────────
 
-module "storage" {
-  source = "./modules/storage"
+module "firestore" {
+  source = "./modules/firestore"
 
   project_id  = var.project_id
   region      = var.region
   environment = var.environment
 }
 
-# ─── IAM ─────────────────────────────────────────────────────────────
+# ─── IAM (CI/CD + backend service account) ──────────────────────────
 
 module "iam" {
   source = "./modules/iam"
 
   project_id  = var.project_id
+  environment = var.environment
+}
+
+# ─── Cloud Run services (frontend + backend) ────────────────────────
+
+module "cloudrun" {
+  source = "./modules/cloudrun"
+
+  project_id                    = var.project_id
+  region                        = var.region
+  environment                   = var.environment
+  domain                        = var.domain
+  registry_url                  = module.gar.registry_url
+  backend_service_account_email = module.iam.backend_service_account_email
+  stats_username                = var.stats_username
+  stats_password                = var.stats_password
+
+  depends_on = [module.firestore, module.iam, module.gar]
+}
+
+# ─── Cloud DNS ───────────────────────────────────────────────────────
+
+module "dns" {
+  source = "./modules/dns"
+
+  project_id      = var.project_id
+  domain          = var.domain
+  environment     = var.environment
+  apex_cname_data = module.cloudrun.apex_dns_records
+  www_cname_data  = module.cloudrun.www_dns_records
+}
+
+# ─── GCS (used for Terraform state and any future backups) ──────────
+
+module "storage" {
+  source = "./modules/storage"
+
+  project_id  = var.project_id
+  region      = var.region
   environment = var.environment
 }

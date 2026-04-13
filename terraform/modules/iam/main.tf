@@ -48,23 +48,30 @@ resource "google_project_iam_member" "ci_cd_gar_writer" {
   member  = "serviceAccount:${google_service_account.ci_cd.email}"
 }
 
-# CI/CD permissions — deploy to GKE
-resource "google_project_iam_member" "ci_cd_gke_developer" {
+# CI/CD permissions — deploy Cloud Run services
+resource "google_project_iam_member" "ci_cd_run_admin" {
   project = var.project_id
-  role    = "roles/container.developer"
+  role    = "roles/run.admin"
   member  = "serviceAccount:${google_service_account.ci_cd.email}"
 }
 
-# Service account for the backend app (Workload Identity)
+# CI/CD must be able to "act as" the backend service account to deploy it
+resource "google_service_account_iam_member" "ci_cd_act_as_backend" {
+  service_account_id = google_service_account.backend.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.ci_cd.email}"
+}
+
+# Service account for the backend Cloud Run service
 resource "google_service_account" "backend" {
   account_id   = "resume-backend"
   display_name = "Resume Backend Service Account"
   project      = var.project_id
 }
 
-# Backend can read/write to backup bucket
-resource "google_project_iam_member" "backend_storage" {
+# Backend reads/writes Firestore (analytics + contact messages)
+resource "google_project_iam_member" "backend_firestore" {
   project = var.project_id
-  role    = "roles/storage.objectUser"
+  role    = "roles/datastore.user"
   member  = "serviceAccount:${google_service_account.backend.email}"
 }

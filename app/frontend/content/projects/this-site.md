@@ -1,34 +1,39 @@
 ---
-title: "ariansvi.com — Over-Engineered on Purpose"
-tags: ["kubernetes", "terraform", "argocd", "github-actions", "python"]
+title: "ariansvi.com — Cloud-Native on a Budget"
+tags: ["cloud-run", "terraform", "firestore", "github-actions", "python"]
 ---
 
-A personal website that runs on the same infrastructure patterns I use in production. Intentionally over-engineered — the architecture is the content.
+A personal website that runs on the same infrastructure patterns I use in production — but tuned to cost less than a coffee per month instead of a small car.
 
 ### How it works
 
 ```
-  git push  →  GitHub Actions  →  Artifact Registry  →  ArgoCD  →  GKE
-              (lint, test, build)  (Docker images)     (GitOps sync)
+  git push  →  GitHub Actions  →  Artifact Registry  →  Cloud Run
+              (lint, test, build)  (Docker images)     (serverless, scales to zero)
 ```
 
-The full pipeline: push code, GitHub Actions runs linting + tests + Docker builds, pushes images to Google Artifact Registry, updates the Kustomize image tags, ArgoCD detects the change and rolls out to GKE Autopilot. About 5 minutes end-to-end.
+Push code → GitHub Actions lints + tests + builds Docker images → pushes to Google Artifact Registry → deploys both services to Cloud Run via `gcloud run deploy`. End-to-end in a few minutes. Auth to GCP is keyless (Workload Identity Federation).
 
 ### Tech stack
 
-- **Infrastructure:** Terraform (GKE Autopilot, VPC, Cloud DNS, IAM, Artifact Registry)
-- **Frontend:** Hugo static site served by Nginx
-- **Backend:** Python FastAPI with SQLite (visitor analytics, health checks)
-- **Deployment:** ArgoCD (GitOps), Kustomize (base + overlays)
-- **TLS:** cert-manager + Let's Encrypt (automated)
-- **Monitoring:** Prometheus + Grafana
-- **CI/CD:** GitHub Actions (5 parallel jobs: lint Python, lint Dockerfiles, lint Terraform, validate Kustomize, run tests)
+- **Infrastructure:** Terraform (Cloud Run, Firestore, Cloud DNS, Artifact Registry, IAM)
+- **Frontend:** Hugo static site served by Nginx, running on Cloud Run
+- **Backend:** Python FastAPI on Cloud Run, Firestore for analytics + contact messages
+- **Domain & TLS:** Cloud Run domain mapping (managed certs, no LB cost)
+- **CI/CD:** GitHub Actions with Workload Identity Federation — no long-lived keys
+- **Previous version:** a GKE Autopilot + ArgoCD + Prometheus version is preserved on the [`archive/gke-stack`](https://github.com/ariansvi/ariansvi-resume-v2/tree/archive/gke-stack) branch
 
-### What I learned building it
+### Why the rewrite
 
-- GKE Autopilot blocks `kube-system` leader election — cert-manager needs `global.leaderElection.namespace` set
-- Hairpin NAT on GKE means cert-manager can't self-check HTTP-01 challenges from inside the cluster — solved with `hostAliases`
-- NetworkPolicies with default-deny break cert-manager ACME solvers — need explicit allow rules
-- Hugo module system and Go module v3 path conventions don't play well together — vendored the theme instead
+The first version was the classic "prove you can run Kubernetes in production" stack — GKE Autopilot, ArgoCD, ingress-nginx, cert-manager, Prometheus, Grafana. It was good demo material but cost ~$120/month to run for a site that gets a few dozen visits a day. Cloud Run with scale-to-zero runs the same workload for under $5/month.
+
+The architecture trade-off is the point: pick the right tool for the actual load, not the most impressive diagram.
+
+### What I learned
+
+- Cloud Run v2 with `cpu_idle = true` and `min_instance_count = 0` eliminates idle cost — cold starts on Python FastAPI with Firestore are 1-2 seconds, fine for a resume site
+- Cloud Run domain mapping needs specific DNS records per service — exposing them as Terraform outputs keeps GoDaddy/Cloud DNS in sync automatically
+- Firestore has no SQL-style GROUP BY; for low volume, aggregating 30 days of analytics in Python at query time is simpler than maintaining denormalized counters
+- Workload Identity Federation from GitHub Actions replaces service account keys entirely — the CI never sees a credential
 
 [Source code →](https://github.com/ariansvi/ariansvi-resume-v2)

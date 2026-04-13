@@ -1,6 +1,6 @@
 # ariansvi.com — DevOps Resume as Code
 
-A production-grade personal resume website that **is itself** a DevOps showcase. Every layer of the stack — from infrastructure provisioning to monitoring — demonstrates real-world engineering practices.
+A personal resume website that **is itself** a DevOps showcase. Every layer of the stack — from infrastructure provisioning to CI/CD — demonstrates real-world engineering practices, tuned to cost ~$5/month instead of $120/month.
 
 **Live:** [https://ariansvi.com](https://ariansvi.com)
 
@@ -20,48 +20,41 @@ A production-grade personal resume website that **is itself** a DevOps showcase.
                          └──────┬──────┘
                                 │
                     ┌───────────▼───────────┐
-                    │    GKE Autopilot      │
+                    │    Cloud Run          │
                     │    (Terraform)        │
                     ├───────────────────────┤
                     │  ┌─────────────────┐  │
-                    │  │  Ingress-NGINX  │  │
-                    │  │  + cert-manager │  │
-                    │  │  (Let's Encrypt)│  │
+                    │  │  Domain mapping │  │
+                    │  │  (managed TLS)  │  │
                     │  └───┬─────────┬───┘  │
                     │      │         │      │
                     │  ┌───▼───┐ ┌───▼───┐  │
                     │  │Frontend│ │Backend│  │
-                    │  │ Hugo + │ │FastAPI│  │
-                    │  │ Nginx  │ │SQLite │  │
-                    │  └───────┘ └───────┘  │
-                    │                       │
-                    │  ┌─────────────────┐  │
-                    │  │   Prometheus    │  │
-                    │  │   + Grafana     │  │
-                    │  └─────────────────┘  │
-                    └───────────────────────┘
-                              ▲
-                    ┌─────────┴─────────┐
-                    │     ArgoCD        │
-                    │   (GitOps sync)   │
-                    └───────────────────┘
+                    │  │Hugo +  │ │FastAPI│  │
+                    │  │ Nginx  │ │       │  │
+                    │  └────────┘ └───┬───┘  │
+                    └─────────────────┼─────┘
+                                      ▼
+                              ┌──────────────┐
+                              │  Firestore   │
+                              │  (analytics) │
+                              └──────────────┘
 ```
+
+**Previous version:** a GKE Autopilot + ArgoCD + ingress-nginx + cert-manager + Prometheus + Grafana build is preserved on the [`archive/gke-stack`](https://github.com/ariansvi/ariansvi-resume-v2/tree/archive/gke-stack) branch.
 
 ## Skills Demonstrated
 
 | Category | Technologies |
 |----------|-------------|
-| **Container Orchestration** | Kubernetes (GKE Autopilot), Helm, Kustomize |
+| **Serverless compute** | Cloud Run v2 (scale-to-zero, managed TLS, domain mapping) |
 | **Infrastructure as Code** | Terraform (modules, remote state, Workload Identity) |
-| **CI/CD** | GitHub Actions, ArgoCD (GitOps), Jenkins (extras) |
-| **Containers** | Docker (multi-stage builds, slim images) |
-| **Backend** | Python FastAPI, SQLAlchemy, SQLite |
-| **Monitoring** | Prometheus, Grafana (custom dashboards) |
-| **Networking** | Ingress-NGINX, cert-manager, NetworkPolicies, Cloud DNS |
-| **Security** | Workload Identity, RBAC, non-root containers, OIDC |
-| **Databases** | SQLite (prod), MySQL (extras), Elasticsearch (extras) |
-| **Service Mesh** | Istio (extras — VirtualService, DestinationRule) |
-| **Scripting** | Bash (bootstrap, teardown, build scripts) |
+| **CI/CD** | GitHub Actions, Workload Identity Federation (no long-lived keys) |
+| **Containers** | Docker (multi-stage, Alpine, runtime config via envsubst) |
+| **Backend** | Python FastAPI, Firestore |
+| **Networking** | Cloud Run domain mapping, Cloud DNS, HTTPS |
+| **Security** | Non-root containers, CSP/HSTS, IP masking in analytics |
+| **(Previous GKE stack)** | Kubernetes, Helm, Kustomize, ArgoCD, Prometheus, cert-manager |
 
 ## Quick Start
 
@@ -72,56 +65,43 @@ A production-grade personal resume website that **is itself** a DevOps showcase.
 make dev
 
 # Frontend: http://localhost:8080
-# Backend API: http://localhost:8000/api/docs
+# Backend API: http://localhost:8000/api/health
 ```
 
-### Deploy to GKE
+The backend needs Firestore. For local dev without GCP, you can run the [Firestore emulator](https://cloud.google.com/firestore/docs/emulator) and set `FIRESTORE_EMULATOR_HOST` — or just skip analytics locally.
+
+### Deploy to Cloud Run
 
 ```bash
 # 0. Authenticate with GCP
 gcloud auth login
 gcloud auth application-default login
 
-# 1. Bootstrap everything (GCP project + infra + cluster + ArgoCD)
-#    You'll be prompted for your billing account ID
-bash scripts/bootstrap.sh
+# 1. Create the GCP project (one-time)
+cd terraform/bootstrap && terraform init && terraform apply
 
-# 2. Configure DNS (GoDaddy → Cloud DNS)
+# 2. Provision all infra (Cloud Run, Firestore, Artifact Registry, DNS, IAM)
+cd ../ && terraform init && terraform apply
+
+# 3. Point GoDaddy nameservers to Cloud DNS
 bash scripts/setup-dns.sh
-
-# 3. Access cluster services
-bash scripts/port-forward.sh
 ```
 
-The bootstrap is fully IaC — even the GCP project itself is created by Terraform (`terraform/bootstrap/`). The flow:
-
-1. **`terraform/bootstrap/`** — creates GCP project, enables APIs, creates state bucket (local state)
-2. **`terraform/`** — creates VPC, GKE, DNS, IAM, Artifact Registry (remote state in GCS)
-3. **`scripts/bootstrap.sh`** — installs ArgoCD, cert-manager, deploys app-of-apps
+After that, every push to `main` that touches `app/**` builds new images and redeploys both Cloud Run services automatically via GitHub Actions.
 
 ## Repository Structure
 
 ```
 .
-├── terraform/           # GKE, VPC, DNS, IAM, Artifact Registry
-│   └── bootstrap/       # GCP project creation (IaC all the way down)
+├── terraform/           # Cloud Run, Firestore, DNS, IAM, Artifact Registry
+│   └── bootstrap/       # GCP project creation
 ├── app/
-│   ├── frontend/        # Hugo static site + Nginx
-│   └── backend/         # Python FastAPI + SQLite
-├── k8s/
-│   ├── base/            # Kustomize base manifests
-│   ├── overlays/        # dev / staging / production
-│   └── argocd/          # App-of-apps GitOps definitions
-├── monitoring/          # Prometheus + Grafana Helm values
-├── extras/              # Deploy-on-demand showcases
-│   ├── elasticsearch/   # EFK logging stack
-│   ├── mysql/           # MySQL database
-│   ├── jenkins/         # Jenkins CI + Jenkinsfile
-│   └── istio/           # Service mesh config
-├── scripts/             # Bash automation
-├── .github/workflows/   # CI/CD pipelines
+│   ├── frontend/        # Hugo + Nginx (templated nginx.conf for Cloud Run)
+│   └── backend/         # Python FastAPI + Firestore
+├── scripts/             # DNS setup helpers
+├── .github/workflows/   # CI + build-push-deploy pipelines
 ├── Makefile             # Developer UX
-└── docker-compose.yaml  # Local development
+└── docker-compose.yaml  # Local dev
 ```
 
 ## Make Targets
@@ -130,10 +110,11 @@ The bootstrap is fully IaC — even the GCP project itself is created by Terrafo
 make help           # Show all targets
 make dev            # Local Docker Compose
 make build          # Build Docker images
+make push           # Push to Artifact Registry
+make deploy         # Deploy current tag to Cloud Run
 make test           # Run tests + linting
 make tf-plan        # Terraform plan
-make bootstrap      # Full cluster setup
-make teardown       # Destroy everything
+make tf-apply       # Terraform apply
 ```
 
 ---

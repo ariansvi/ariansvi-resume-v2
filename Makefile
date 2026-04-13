@@ -1,4 +1,4 @@
-.PHONY: help build test lint clean dev deploy-dev deploy-prod tf-plan tf-apply bootstrap teardown
+.PHONY: help build test lint clean dev tf-plan tf-apply tf-destroy
 
 SHELL := /bin/bash
 PROJECT_ID ?= arian-svirsky-resume
@@ -14,7 +14,7 @@ help: ## Show this help
 
 # ─── Local Development ───────────────────────────────────────────────
 
-dev: ## Start local development environment
+dev: ## Start local development environment (docker compose)
 	docker compose up --build
 
 dev-frontend: ## Start only Hugo dev server
@@ -27,79 +27,58 @@ dev-backend: ## Start only FastAPI dev server
 
 build: build-frontend build-backend ## Build all Docker images
 
-build-frontend: ## Build frontend Docker image
+build-frontend:
 	docker build -t $(FRONTEND_IMAGE):$(TAG) -t $(FRONTEND_IMAGE):latest app/frontend/
 
-build-backend: ## Build backend Docker image
+build-backend:
 	docker build -t $(BACKEND_IMAGE):$(TAG) -t $(BACKEND_IMAGE):latest app/backend/
 
-push: push-frontend push-backend ## Push all images to registry
+push: push-frontend push-backend ## Push all images
 
-push-frontend: ## Push frontend image
+push-frontend:
 	docker push $(FRONTEND_IMAGE):$(TAG)
 	docker push $(FRONTEND_IMAGE):latest
 
-push-backend: ## Push backend image
+push-backend:
 	docker push $(BACKEND_IMAGE):$(TAG)
 	docker push $(BACKEND_IMAGE):latest
+
+# ─── Cloud Run deploy (usually done by CI) ───────────────────────────
+
+deploy: ## Deploy current image tags to Cloud Run
+	gcloud run deploy resume-backend  --image $(BACKEND_IMAGE):$(TAG)  --region $(REGION) --quiet
+	gcloud run deploy resume-frontend --image $(FRONTEND_IMAGE):$(TAG) --region $(REGION) --quiet
 
 # ─── Testing ─────────────────────────────────────────────────────────
 
 test: test-backend lint ## Run all tests
 
-test-backend: ## Run backend pytest suite
+test-backend:
 	cd app/backend && python -m pytest tests/ -v --tb=short
 
-lint: lint-python lint-docker ## Run all linters
+lint: lint-python lint-docker
 
-lint-python: ## Lint Python code
+lint-python:
 	cd app/backend && python -m flake8 app/ tests/ --max-line-length=88
 	cd app/backend && python -m mypy app/ --ignore-missing-imports
 
-lint-docker: ## Lint Dockerfiles
+lint-docker:
 	docker run --rm -i hadolint/hadolint < app/frontend/Dockerfile || true
 	docker run --rm -i hadolint/hadolint < app/backend/Dockerfile || true
 
 # ─── Terraform ───────────────────────────────────────────────────────
 
-tf-init: ## Initialize Terraform
+tf-init:
 	cd terraform && terraform init
 
 tf-plan: ## Plan Terraform changes
-	cd terraform && terraform plan -var-file=environments/prod/terraform.tfvars
+	cd terraform && terraform plan
 
 tf-apply: ## Apply Terraform changes
-	cd terraform && terraform apply -var-file=environments/prod/terraform.tfvars
+	cd terraform && terraform apply
 
-tf-destroy: ## Destroy Terraform resources
-	cd terraform && terraform destroy -var-file=environments/prod/terraform.tfvars
-
-# ─── Cluster Operations ─────────────────────────────────────────────
-
-bootstrap: ## Full bootstrap: Terraform + ArgoCD + cluster services
-	@echo "🚀 Bootstrapping cluster..."
-	bash scripts/bootstrap.sh
-
-teardown: ## Tear down all resources
-	@echo "💥 Tearing down..."
-	bash scripts/teardown.sh
-
-port-forward: ## Port-forward ArgoCD and Grafana
-	bash scripts/port-forward.sh
-
-# ─── Kubernetes ──────────────────────────────────────────────────────
-
-kustomize-dev: ## Build kustomize for dev
-	kubectl kustomize k8s/overlays/dev
-
-kustomize-staging: ## Build kustomize for staging
-	kubectl kustomize k8s/overlays/staging
-
-kustomize-prod: ## Build kustomize for production
-	kubectl kustomize k8s/overlays/production
-
-deploy-dev: build ## Build and deploy to dev (local k8s)
-	kubectl kustomize k8s/overlays/dev | kubectl apply -f -
+tf-destroy: ## Destroy all Terraform-managed resources
+	cd terraform && terraform destroy
 
 # ─── Cleanup ─────────────────────────────────────────────────────────
 

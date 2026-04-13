@@ -1,29 +1,29 @@
-import os
+"""Firestore client factory.
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+Firestore replaces the previous SQLAlchemy/SQLite setup. Collections:
+  - page_visits: one doc per recorded pageview
+  - contact_messages: one doc per contact form submission
+"""
+
+from functools import lru_cache
+
+from google.cloud import firestore
 
 from app.config import settings
 
-os.makedirs("data", exist_ok=True)
 
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
+@lru_cache(maxsize=1)
+def get_client() -> firestore.Client:
+    """Return a cached Firestore client.
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    When GCP_PROJECT_ID is empty (local dev without GCP creds), the client
+    will fall back to whatever ADC is configured or the emulator.
+    """
+    if settings.GCP_PROJECT_ID:
+        return firestore.Client(project=settings.GCP_PROJECT_ID)
+    return firestore.Client()
 
 
-def init_db():
-    Base.metadata.create_all(bind=engine)
+def init_db() -> None:
+    """No-op for Firestore — kept for compatibility with startup hook."""
+    return None

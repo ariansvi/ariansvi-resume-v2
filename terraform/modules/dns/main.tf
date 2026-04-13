@@ -14,25 +14,42 @@ resource "google_dns_managed_zone" "main" {
   }
 }
 
-# A records pointing to the ingress load balancer IP
-resource "google_dns_record_set" "root" {
+# Cloud Run domain mapping asks for specific records (type + rrdata).
+# We create whatever it asks for the apex and www names.
+
+locals {
+  # Group records by (fqdn, type) because Cloud DNS needs one record_set
+  # per (name, type) pair with all rrdatas collected.
+  apex_grouped = {
+    for t in distinct([for r in var.apex_cname_data : r.type]) : t => [
+      for r in var.apex_cname_data : r.rrdata if r.type == t
+    ]
+  }
+  www_grouped = {
+    for t in distinct([for r in var.www_cname_data : r.type]) : t => [
+      for r in var.www_cname_data : r.rrdata if r.type == t
+    ]
+  }
+}
+
+resource "google_dns_record_set" "apex" {
+  for_each = local.apex_grouped
+
   name         = "${var.domain}."
   managed_zone = google_dns_managed_zone.main.name
   project      = var.project_id
-  type         = "A"
+  type         = each.key
   ttl          = 300
-  rrdatas      = [var.ingress_ip]
-
-  count = var.ingress_ip != "" ? 1 : 0
+  rrdatas      = each.value
 }
 
 resource "google_dns_record_set" "www" {
+  for_each = local.www_grouped
+
   name         = "www.${var.domain}."
   managed_zone = google_dns_managed_zone.main.name
   project      = var.project_id
-  type         = "CNAME"
+  type         = each.key
   ttl          = 300
-  rrdatas      = ["${var.domain}."]
-
-  count = var.ingress_ip != "" ? 1 : 0
+  rrdatas      = each.value
 }

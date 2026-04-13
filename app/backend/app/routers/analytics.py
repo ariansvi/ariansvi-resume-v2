@@ -1,22 +1,23 @@
 import logging
 import secrets
-from datetime import datetime, timedelta
+from collections import Counter
+from datetime import datetime, timedelta, timezone
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from google.cloud import firestore
 from pydantic import BaseModel
-from sqlalchemy import func
-from sqlalchemy.orm import Session
 from user_agents import parse as parse_ua
 
 from app.config import settings
-from app.database import get_db
-from app.models import PageVisit
+from app.database import get_client
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 logger = logging.getLogger(__name__)
 security = HTTPBasic()
+
+COLLECTION = "page_visits"
 
 
 def verify_credentials(
@@ -42,14 +43,14 @@ _geo_cache: dict[str, dict] = {}
 
 
 def _mask_ip(ip: str | None) -> str:
-    """Mask last octet (IPv4) or last hextet group (IPv6) for privacy."""
+    """Mask last octet (IPv4) or last hextet (IPv6) for privacy."""
     if not ip:
         return "-"
-    if "." in ip:  # IPv4
+    if "." in ip:
         parts = ip.split(".")
         if len(parts) == 4:
             return ".".join(parts[:3] + ["x"])
-    if ":" in ip:  # IPv6
+    if ":" in ip:
         parts = ip.split(":")
         if len(parts) > 1:
             return ":".join(parts[:-1] + ["x"])
@@ -57,27 +58,23 @@ def _mask_ip(ip: str | None) -> str:
 
 
 async def _geoip_lookup(ip: str) -> dict:
-    """Lookup country/city from IP using free API."""
     if not ip or ip in ("127.0.0.1", "::1", "localhost"):
         return {"country": "Local", "city": ""}
-
     if ip in _geo_cache:
         return _geo_cache[ip]
-
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
             r = await client.get(f"https://ipapi.co/{ip}/json/")
             if r.status_code == 200:
                 data = r.json()
                 result = {
-                    "country": data.get("country", "Unknown"),
+                    "country": data.get("country_name", "Unknown"),
                     "city": data.get("city", ""),
                 }
                 _geo_cache[ip] = result
                 return result
     except Exception:
         logger.debug("GeoIP lookup failed for %s", ip)
-
     return {"country": "Unknown", "city": ""}
 
 
@@ -90,20 +87,15 @@ class VisitCreate(BaseModel):
 async def record_visit(
     visit: VisitCreate,
     request: Request,
-    db: Session = Depends(get_db),
 ):
-    # Get real IP (behind ingress/proxy)
     ip = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
     if not ip:
         ip = request.client.host if request.client else ""
 
-    # GeoIP
     geo = await _geoip_lookup(ip or "")
 
-    # Parse user agent
     ua_str = request.headers.get("user-agent", "")
     ua = parse_ua(ua_str)
-
     if ua.is_mobile:
         device = "mobile"
     elif ua.is_tablet:
@@ -113,131 +105,120 @@ async def record_visit(
     else:
         device = "desktop"
 
-    db_visit = PageVisit(
-        path=visit.path,
-        referrer=visit.referrer,
-        user_agent=ua_str,
-        ip_address=ip,
-        country=geo["country"],
-        city=geo["city"],
-        browser=ua.browser.family or "Unknown",
-        os=ua.os.family or "Unknown",
-        device_type=device,
-    )
-    db.add(db_visit)
-    db.commit()
+    doc = {
+        "path": visit.path,
+        "referrer": visit.referrer,
+        "user_agent": ua_str,
+        "ip_address": ip,
+        "country": geo["country"],
+        "city": geo["city"],
+        "browser": ua.browser.family or "Unknown",
+        "os": ua.os.family or "Unknown",
+        "device_type": device,
+        "created_at": firestore.SERVER_TIMESTAMP,
+    }
+    try:
+        get_client().collection(COLLECTION).add(doc)
+    except Exception:
+        logger.exception("Failed to record visit")
+        raise HTTPException(status_code=500, detail="Failed to record visit")
+
     return {"status": "recorded"}
+
+
+def _bucket(docs: list[dict], key: str, limit: int = 10) -> list[dict]:
+    counts = Counter(
+        (d.get(key) or "Unknown") for d in docs if d.get(key) is not None
+    )
+    return [
+        {key: k, "count": c}
+        for k, c in counts.most_common(limit)
+    ]
 
 
 @router.get("/dashboard")
 def get_dashboard(
-    db: Session = Depends(get_db),
     _user: str = Depends(verify_credentials),
 ):
-    """Rich analytics data for the stats page."""
-    now = datetime.utcnow()
+    """Aggregate analytics for the stats page.
+
+    We pull the last 30 days of visits once and aggregate in Python.
+    Firestore has no SQL-style GROUP BY; for a personal site the daily
+    volume is small enough that in-memory aggregation is fine.
+    """
+    now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = today_start - timedelta(days=7)
     month_start = today_start - timedelta(days=30)
 
-    total = db.query(func.count(PageVisit.id)).scalar() or 0
-    today = (
-        db.query(func.count(PageVisit.id))
-        .filter(PageVisit.created_at >= today_start)
-        .scalar() or 0
-    )
-    this_week = (
-        db.query(func.count(PageVisit.id))
-        .filter(PageVisit.created_at >= week_start)
-        .scalar() or 0
-    )
-    unique_ips = (
-        db.query(func.count(func.distinct(PageVisit.ip_address)))
-        .scalar() or 0
-    )
-
-    # Top pages
-    top_pages = (
-        db.query(PageVisit.path, func.count(PageVisit.id).label("c"))
-        .group_by(PageVisit.path)
-        .order_by(func.count(PageVisit.id).desc())
-        .limit(10)
-        .all()
-    )
-
-    # By country
-    by_country = (
-        db.query(PageVisit.country, func.count(PageVisit.id).label("c"))
-        .filter(PageVisit.country.isnot(None))
-        .group_by(PageVisit.country)
-        .order_by(func.count(PageVisit.id).desc())
-        .limit(15)
-        .all()
-    )
-
-    # By city
-    by_city = (
-        db.query(
-            PageVisit.city,
-            PageVisit.country,
-            func.count(PageVisit.id).label("c"),
+    try:
+        col = get_client().collection(COLLECTION)
+        total = col.count().get()[0][0].value
+        recent_30d = list(
+            col.where("created_at", ">=", month_start)
+            .order_by("created_at", direction=firestore.Query.DESCENDING)
+            .stream()
         )
-        .filter(PageVisit.city.isnot(None), PageVisit.city != "")
-        .group_by(PageVisit.city, PageVisit.country)
-        .order_by(func.count(PageVisit.id).desc())
-        .limit(10)
-        .all()
-    )
+    except Exception:
+        logger.exception("Firestore query failed")
+        raise HTTPException(status_code=500, detail="Analytics unavailable")
 
-    # By browser
-    by_browser = (
-        db.query(PageVisit.browser, func.count(PageVisit.id).label("c"))
-        .filter(PageVisit.browser.isnot(None))
-        .group_by(PageVisit.browser)
-        .order_by(func.count(PageVisit.id).desc())
-        .limit(10)
-        .all()
-    )
+    # Normalize to plain dicts with created_at as datetime
+    visits = []
+    for snap in recent_30d:
+        data = snap.to_dict() or {}
+        ts = data.get("created_at")
+        if hasattr(ts, "to_datetime"):
+            ts = ts.to_datetime()
+        data["created_at"] = ts
+        visits.append(data)
 
-    # By OS
-    by_os = (
-        db.query(PageVisit.os, func.count(PageVisit.id).label("c"))
-        .filter(PageVisit.os.isnot(None))
-        .group_by(PageVisit.os)
-        .order_by(func.count(PageVisit.id).desc())
-        .limit(10)
-        .all()
+    today = sum(
+        1 for v in visits
+        if v.get("created_at") and v["created_at"] >= today_start
     )
+    this_week = sum(
+        1 for v in visits
+        if v.get("created_at") and v["created_at"] >= week_start
+    )
+    unique_ips = len({v.get("ip_address") for v in visits if v.get("ip_address")})
 
-    # By device type
-    by_device = (
-        db.query(PageVisit.device_type, func.count(PageVisit.id).label("c"))
-        .filter(PageVisit.device_type.isnot(None))
-        .group_by(PageVisit.device_type)
-        .order_by(func.count(PageVisit.id).desc())
-        .all()
-    )
+    # Daily histogram
+    by_day: Counter = Counter()
+    for v in visits:
+        ts = v.get("created_at")
+        if ts:
+            by_day[ts.date().isoformat()] += 1
+    daily = [
+        {"date": d, "count": by_day[d]}
+        for d in sorted(by_day)
+    ]
 
-    # Visits per day (last 30 days)
-    day_expr = func.date(PageVisit.created_at)
-    daily = (
-        db.query(
-            day_expr.label("day"),
-            func.count(PageVisit.id).label("c"),
-        )
-        .filter(PageVisit.created_at >= month_start)
-        .group_by(day_expr)
-        .order_by(day_expr)
-        .all()
-    )
+    # City-level aggregation
+    city_counter: Counter = Counter()
+    for v in visits:
+        city = v.get("city") or ""
+        country = v.get("country") or "Unknown"
+        if city:
+            city_counter[(city, country)] += 1
+    by_city = [
+        {"city": c[0], "country": c[1], "count": n}
+        for c, n in city_counter.most_common(10)
+    ]
 
-    # Recent visitors (last 20)
-    recent = (
-        db.query(PageVisit)
-        .order_by(PageVisit.created_at.desc())
-        .limit(20)
-        .all()
-    )
+    recent = [
+        {
+            "path": v.get("path"),
+            "country": v.get("country"),
+            "city": v.get("city"),
+            "browser": v.get("browser"),
+            "os": v.get("os"),
+            "device": v.get("device_type"),
+            "ip": _mask_ip(v.get("ip_address")),
+            "time": v["created_at"].isoformat() if v.get("created_at") else None,
+        }
+        for v in visits[:20]
+    ]
 
     return {
         "summary": {
@@ -246,29 +227,24 @@ def get_dashboard(
             "visits_this_week": this_week,
             "unique_visitors": unique_ips,
         },
-        "top_pages": [{"path": p, "count": c} for p, c in top_pages],
-        "by_country": [{"country": co, "count": c} for co, c in by_country],
-        "by_city": [
-            {"city": ci, "country": co, "count": c}
-            for ci, co, c in by_city
+        "top_pages": _bucket(visits, "path"),
+        "by_country": [
+            {"country": r["country"], "count": r["count"]}
+            for r in _bucket(visits, "country", limit=15)
         ],
-        "by_browser": [{"browser": b, "count": c} for b, c in by_browser],
-        "by_os": [{"os": o, "count": c} for o, c in by_os],
-        "by_device": [{"device": d, "count": c} for d, c in by_device],
-        "daily": [
-            {"date": str(d), "count": c} for d, c in daily
+        "by_city": by_city,
+        "by_browser": [
+            {"browser": r["browser"], "count": r["count"]}
+            for r in _bucket(visits, "browser")
         ],
-        "recent": [
-            {
-                "path": v.path,
-                "country": v.country,
-                "city": v.city,
-                "browser": v.browser,
-                "os": v.os,
-                "device": v.device_type,
-                "ip": _mask_ip(v.ip_address),
-                "time": v.created_at.isoformat() if v.created_at else None,
-            }
-            for v in recent
+        "by_os": [
+            {"os": r["os"], "count": r["count"]}
+            for r in _bucket(visits, "os")
         ],
+        "by_device": [
+            {"device": r["device_type"], "count": r["count"]}
+            for r in _bucket(visits, "device_type")
+        ],
+        "daily": daily,
+        "recent": recent,
     }

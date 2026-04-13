@@ -21,14 +21,15 @@ variable "domain" {
   default     = "ariansvi.com"
 }
 
-variable "cluster_name" {
-  description = "GKE cluster name"
+variable "stats_username" {
+  description = "Username for /stats dashboard"
   type        = string
-  default     = "resume-cluster"
+  sensitive   = true
+  default     = "arian"
 }
 
-variable "ingress_ip" {
-  description = "External IP of the ingress load balancer (set after first deploy)"
+variable "stats_password" {
+  description = "Password for /stats dashboard"
   type        = string
-  default     = ""
+  sensitive   = true
 }

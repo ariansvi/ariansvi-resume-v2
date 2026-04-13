@@ -5,10 +5,12 @@ services:
       args:
         - HUGO_BASEURL=http://localhost:8080/
     ports:
-      - "8080:80"
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - BACKEND_URL=http://backend:8000
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     networks:
       - resume
 
@@ -19,22 +21,14 @@ services:
       - "8000:8000"
     environment:
       - ENVIRONMENT=development
-      - DATABASE_URL=sqlite:///./data/resume.db
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID:-}
       - CORS_ORIGINS=http://localhost:8080,http://localhost
       - LOG_LEVEL=DEBUG
-    volumes:
-      - backend-data:/app/data
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
+      - PORT=8000
+      - STATS_USERNAME=${STATS_USERNAME:-arian}
+      - STATS_PASSWORD=${STATS_PASSWORD:-devops2024}
     networks:
       - resume
-
-volumes:
-  backend-data:
 
 networks:
   resume:
