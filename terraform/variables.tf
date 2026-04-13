@@ -33,3 +33,7 @@ variable "stats_password" {
   type        = string
   sensitive   = true
 }
+
+variable "test" {
+  default = true
+}
