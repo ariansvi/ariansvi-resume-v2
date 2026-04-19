@@ -12,7 +12,7 @@ theme = "terminal"
   description = "DevOps Engineer | Infrastructure, Kubernetes, Observability, CI/CD"
 
   [params.logo]
-    logoText = "arian@devops:~$"
+    logoText = "arian.svirsky@devops:~$"
     logoHomeLink = "/"
 
   [params.footer]

@@ -14,7 +14,12 @@ Terraform for cloud resources (modules, remote state, workspaces). Pulumi when t
 GitHub Actions is my current default. I've also built and maintained Jenkins shared libraries and GitLab CI DAG pipelines. The best CI system is the one your team actually understands.
 
 ## Cloud
-AWS is my deepest — EKS, EC2, RDS, S3, Lambda, Route53, IAM, VPC. GCP for GKE and Cloud DNS.
+
+**GCP** — deepest, from 6 years running Palo Alto Networks workloads on it. GKE, GCE, Cloud SQL, GCS, Cloud DNS, IAM, VPC, Cloud Build, Pub/Sub, Workload Identity, Secret Manager. Comfortable designing a project from org-level IAM down to individual service accounts.
+
+**AWS** — strong. Demisto ran on AWS, and I own AWS infrastructure at Descope today. EKS, EC2, RDS, S3, Lambda, Route53, IAM, VPC, ALB/NLB, Secrets Manager, ECR. Terraform-first, comfortable debugging IAM at 2am.
+
+**Multi-cloud in production is different from using both** — at Descope I deploy the same platform to AWS and GCP simultaneously, which forces you to think about what's actually portable vs. what needs a cloud-specific shim.
 
 ## Monitoring
 Datadog in production (APM, logs, dashboards, SLOs). Prometheus + Grafana for self-hosted setups. ELK when you need to search through 100GB of logs. The tool matters less than having the discipline to actually look at the dashboards.

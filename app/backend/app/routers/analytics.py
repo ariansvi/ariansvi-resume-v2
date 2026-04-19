@@ -102,24 +102,60 @@ _geo_cache: dict[str, dict] = {}
 
 
 async def _geoip_lookup(ip: str) -> dict:
+    """Best-effort country/city lookup for a visitor IP.
+
+    Tries ip-api.com (HTTPS, 45 req/min unauthenticated — well beyond our
+    traffic) then falls back to ipapi.co. Caches both hits and misses so
+    a failed lookup doesn't keep burning quota on every subsequent visit
+    from the same address.
+    """
     if not ip or ip in ("127.0.0.1", "::1", "localhost"):
         return {"country": "Local", "city": ""}
     if ip in _geo_cache:
         return _geo_cache[ip]
-    try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
-            r = await client.get(f"https://ipapi.co/{ip}/json/")
-            if r.status_code == 200:
-                data = r.json()
-                result = {
-                    "country": data.get("country_name", "Unknown"),
-                    "city": data.get("city", ""),
+
+    providers = [
+        # ip-api.com: 45/min free, HTTPS available on the no-key endpoint
+        (
+            f"https://ip-api.com/json/{ip}?fields=status,country,city",
+            lambda d: (
+                {"country": d.get("country", ""), "city": d.get("city", "")}
+                if d.get("status") == "success"
+                else None
+            ),
+        ),
+        # ipapi.co: backup, 1000/day free
+        (
+            f"https://ipapi.co/{ip}/json/",
+            lambda d: (
+                {
+                    "country": d.get("country_name", ""),
+                    "city": d.get("city", ""),
                 }
-                _geo_cache[ip] = result
-                return result
-    except Exception:
-        logger.debug("GeoIP lookup failed for %s", ip)
-    return {"country": "Unknown", "city": ""}
+                if d.get("country_name")
+                else None
+            ),
+        ),
+    ]
+
+    for url, extract in providers:
+        try:
+            async with httpx.AsyncClient(timeout=4.0) as client:
+                r = await client.get(url)
+            if r.status_code != 200:
+                logger.info("GeoIP %s returned %s for %s", url, r.status_code, ip)
+                continue
+            parsed = extract(r.json())
+            if parsed and parsed["country"]:
+                _geo_cache[ip] = parsed
+                return parsed
+        except Exception as e:
+            logger.info("GeoIP lookup failed for %s via %s: %s", ip, url, e)
+
+    # Cache the miss so we don't keep retrying every provider for this IP.
+    fallback = {"country": "Unknown", "city": ""}
+    _geo_cache[ip] = fallback
+    return fallback
 
 
 class VisitCreate(BaseModel):
